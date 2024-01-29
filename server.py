@@ -46,7 +46,7 @@ from modules import (
     ui_model_menu,
     #ui_notebook,
     ui_parameters,
-    ui_session,
+    #ui_session,
     utils
 )
 from modules.extensions import apply_extensions
@@ -132,7 +132,7 @@ def create_interface():
         ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
         ui_model_menu.create_ui()  # Model tab
         training.create_ui()  # Training tab
-        ui_session.create_ui()  # Session tab
+        #ui_session.create_ui()  # Session tab
 
         # Generation events
         ui_chat.create_event_handlers()

@@ -175,11 +175,11 @@ def list_interface_input_elements():
 
     # Notebook/default elements
     elements += [
-        'textbox-notebook',
-        'textbox-default',
-        'output_textbox',
-        'prompt_menu-default',
-        'prompt_menu-notebook',
+        #'textbox-notebook',
+        #'textbox-default',
+        #'output_textbox',
+        #'prompt_menu-default',
+        #'prompt_menu-notebook',
     ]
 
     # Model elements

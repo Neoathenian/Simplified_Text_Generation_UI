@@ -41,10 +41,10 @@ from modules import (
     training,
     ui,
     ui_chat,
-    ui_default,
+    #ui_default,
     ui_file_saving,
     ui_model_menu,
-    ui_notebook,
+    #ui_notebook,
     ui_parameters,
     ui_session,
     utils
@@ -126,8 +126,8 @@ def create_interface():
 
         # Text Generation tab
         ui_chat.create_ui()
-        ui_default.create_ui()
-        ui_notebook.create_ui()
+        #ui_default.create_ui()
+       # ui_notebook.create_ui()
 
         ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
         ui_model_menu.create_ui()  # Model tab
@@ -136,8 +136,8 @@ def create_interface():
 
         # Generation events
         ui_chat.create_event_handlers()
-        ui_default.create_event_handlers()
-        ui_notebook.create_event_handlers()
+        #ui_default.create_event_handlers()
+        #ui_notebook.create_event_handlers()
 
         # Other events
         ui_file_saving.create_event_handlers()

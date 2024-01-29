@@ -340,17 +340,17 @@ def create_event_handlers():
         chat.upload_your_profile_picture, gradio('your_picture'), None).then(
         partial(chat.redraw_html, reset_cache=True), gradio(reload_arr), gradio('display'))
 
-    shared.gradio['send_instruction_to_default'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: x.update({'mode': 'instruct', 'history': {'internal': [], 'visible': []}}), gradio('interface_state'), None).then(
-        partial(chat.generate_chat_prompt, 'Input'), gradio('interface_state'), gradio('textbox-default')).then(
-        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_default()}}')
+    #shared.gradio['send_instruction_to_default'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    lambda x: x.update({'mode': 'instruct', 'history': {'internal': [], 'visible': []}}), gradio('interface_state'), None).then(
+    #    partial(chat.generate_chat_prompt, 'Input'), gradio('interface_state'), gradio('textbox-default')).then(
+    #    lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_default()}}')
 
-    shared.gradio['send_instruction_to_notebook'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: x.update({'mode': 'instruct', 'history': {'internal': [], 'visible': []}}), gradio('interface_state'), None).then(
-        partial(chat.generate_chat_prompt, 'Input'), gradio('interface_state'), gradio('textbox-notebook')).then(
-        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_notebook()}}')
+    #shared.gradio['send_instruction_to_notebook'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    lambda x: x.update({'mode': 'instruct', 'history': {'internal': [], 'visible': []}}), gradio('interface_state'), None).then(
+    #    partial(chat.generate_chat_prompt, 'Input'), gradio('interface_state'), gradio('textbox-notebook')).then(
+    #    lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_notebook()}}')
 
     shared.gradio['send_instruction_to_negative_prompt'].click(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
@@ -358,14 +358,14 @@ def create_event_handlers():
         partial(chat.generate_chat_prompt, 'Input'), gradio('interface_state'), gradio('negative_prompt')).then(
         lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_generation_parameters()}}')
 
-    shared.gradio['send-chat-to-default'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-default')).then(
-        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_default()}}')
+    #shared.gradio['send-chat-to-default'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-default')).then(
+    #    lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_default()}}')
 
-    shared.gradio['send-chat-to-notebook'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-notebook')).then(
-        lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_notebook()}}')
+    #shared.gradio['send-chat-to-notebook'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    partial(chat.generate_chat_prompt, '', _continue=True), gradio('interface_state'), gradio('textbox-notebook')).then(
+    #    lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_notebook()}}')
 
     shared.gradio['show_controls'].change(None, gradio('show_controls'), None, _js=f'(x) => {{{ui.show_controls_js}; toggle_controls(x)}}')

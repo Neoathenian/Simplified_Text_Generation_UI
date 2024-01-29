@@ -390,9 +390,6 @@ if __name__ == "__main__":
         else:
             model_dir = 'models'
 
-        if len([item for item in glob.glob(f'{model_dir}/*') if not item.endswith(('.txt', '.yaml'))]) == 0:
-            print_big_message("WARNING: You haven't downloaded any model yet.\nOnce the web UI launches, head over to the \"Model\" tab and download one.")
-
         # Workaround for llama-cpp-python loading paths in CUDA env vars even if they do not exist
         conda_path_bin = os.path.join(conda_env_path, "bin")
         if not os.path.exists(conda_path_bin):

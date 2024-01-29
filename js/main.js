@@ -92,11 +92,11 @@ document.addEventListener("keydown", function(event) {
     document.getElementById("Replace-last").click();
   }
 
-  // Impersonate on Ctrl + Shift + M
-  else if (event.ctrlKey && event.shiftKey && event.key === "M") {
-    event.preventDefault();
-    document.getElementById("Impersonate").click();
-  }
+  //// Impersonate on Ctrl + Shift + M
+  //else if (event.ctrlKey && event.shiftKey && event.key === "M") {
+  //  event.preventDefault();
+  //  document.getElementById("Impersonate").click();
+  //}
 
   // Switch between tabs on Tab
   else if (!event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey && event.key === "Tab") {

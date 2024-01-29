@@ -76,113 +76,7 @@ def get_generation_prompt(renderer, impersonate=False, strip_trailing_spaces=Tru
 
 
 def generate_chat_prompt(user_input, state, **kwargs):
-    impersonate = kwargs.get('impersonate', False)
-    _continue = kwargs.get('_continue', False)
-    also_return_rows = kwargs.get('also_return_rows', False)
-    history = kwargs.get('history', state['history'])['internal']
-
-    # Templates
-    chat_template = jinja_env.from_string(state['chat_template_str'])
-    instruction_template = jinja_env.from_string(state['instruction_template_str'])
-    chat_renderer = partial(chat_template.render, add_generation_prompt=False, name1=state['name1'], name2=state['name2'])
-    instruct_renderer = partial(instruction_template.render, add_generation_prompt=False)
-
-    messages = []
-
-    if state['mode'] == 'instruct':
-        renderer = instruct_renderer
-        if state['custom_system_message'].strip() != '':
-            messages.append({"role": "system", "content": state['custom_system_message']})
-    else:
-        renderer = chat_renderer
-        if state['context'].strip() != '':
-            context = replace_character_names(state['context'], state['name1'], state['name2'])
-            messages.append({"role": "system", "content": context})
-
-    insert_pos = len(messages)
-    for user_msg, assistant_msg in reversed(history):
-        user_msg = user_msg.strip()
-        assistant_msg = assistant_msg.strip()
-
-        if assistant_msg:
-            messages.insert(insert_pos, {"role": "assistant", "content": assistant_msg})
-
-        if user_msg not in ['', '<|BEGIN-VISIBLE-CHAT|>']:
-            messages.insert(insert_pos, {"role": "user", "content": user_msg})
-
-    user_input = user_input.strip()
-    if user_input and not impersonate and not _continue:
-        messages.append({"role": "user", "content": user_input})
-
-    def remove_extra_bos(prompt):
-        for bos_token in ['<s>', '<|startoftext|>']:
-            while prompt.startswith(bos_token):
-                prompt = prompt[len(bos_token):]
-
-        return prompt
-
-    def make_prompt(messages):
-        if state['mode'] == 'chat-instruct' and _continue:
-            prompt = renderer(messages=messages[:-1])
-        else:
-            prompt = renderer(messages=messages)
-
-        if state['mode'] == 'chat-instruct':
-            outer_messages = []
-            if state['custom_system_message'].strip() != '':
-                outer_messages.append({"role": "system", "content": state['custom_system_message']})
-
-            prompt = remove_extra_bos(prompt)
-            command = state['chat-instruct_command']
-            command = command.replace('<|character|>', state['name2'] if not impersonate else state['name1'])
-            command = command.replace('<|prompt|>', prompt)
-
-            if _continue:
-                prefix = get_generation_prompt(renderer, impersonate=impersonate, strip_trailing_spaces=False)[0]
-                prefix += messages[-1]["content"]
-            else:
-                prefix = get_generation_prompt(renderer, impersonate=impersonate)[0]
-                if not impersonate:
-                    prefix = apply_extensions('bot_prefix', prefix, state)
-
-            outer_messages.append({"role": "user", "content": command})
-            outer_messages.append({"role": "assistant", "content": prefix})
-
-            prompt = instruction_template.render(messages=outer_messages)
-            suffix = get_generation_prompt(instruct_renderer, impersonate=False)[1]
-            prompt = prompt[:-len(suffix)]
-
-        else:
-            if _continue:
-                suffix = get_generation_prompt(renderer, impersonate=impersonate)[1]
-                prompt = prompt[:-len(suffix)]
-            else:
-                prefix = get_generation_prompt(renderer, impersonate=impersonate)[0]
-                if state['mode'] == 'chat' and not impersonate:
-                    prefix = apply_extensions('bot_prefix', prefix, state)
-
-                prompt += prefix
-
-        prompt = remove_extra_bos(prompt)
-        return prompt
-
-    prompt = make_prompt(messages)
-
-    # Handle truncation
-    max_length = get_max_prompt_length(state)
-    while len(messages) > 0 and get_encoded_length(prompt) > max_length:
-        # Try to save the system message
-        if len(messages) > 1 and messages[0]['role'] == 'system':
-            messages.pop(1)
-        else:
-            messages.pop(0)
-
-        prompt = make_prompt(messages)
-
-    if also_return_rows:
-        return prompt, [message['content'] for message in messages]
-    else:
-        return prompt
+    return user_input.strip()
 
 
 def get_stopping_strings(state):
@@ -259,9 +153,6 @@ def chatbot_wrapper(text, state, regenerate=False, _continue=False, loading_mess
                     'internal': output['internal']
                 }
 
-    if shared.model_name == 'None' or shared.model is None:
-        raise ValueError("No model is loaded! Select one in the Model tab.")
-
     # Generate the prompt
     kwargs = {
         '_continue': _continue,
@@ -300,26 +191,6 @@ def chatbot_wrapper(text, state, regenerate=False, _continue=False, loading_mess
 
     output['visible'][-1][1] = apply_extensions('output', output['visible'][-1][1], state, is_chat=True)
     yield output
-
-
-def impersonate_wrapper(text, state):
-
-    static_output = chat_html_wrapper(state['history'], state['name1'], state['name2'], state['mode'], state['chat_style'], state['character_menu'])
-
-    if shared.model_name == 'None' or shared.model is None:
-        logger.error("No model is loaded! Select one in the Model tab.")
-        yield '', static_output
-        return
-
-    prompt = generate_chat_prompt('', state, impersonate=True)
-    stopping_strings = get_stopping_strings(state)
-
-    yield text + '...', static_output
-    reply = None
-    for reply in generate_reply(prompt + text, state, stopping_strings=stopping_strings, is_chat=True):
-        yield (text + reply).lstrip(' '), static_output
-        if shared.stop_everything:
-            return
 
 
 def generate_chat_reply(text, state, regenerate=False, _continue=False, loading_message=True, for_ui=False):
@@ -365,7 +236,6 @@ def generate_chat_reply_wrapper(text, state, regenerate=False, _continue=False):
     for i, history in enumerate(generate_chat_reply(text, state, regenerate, _continue, loading_message=True, for_ui=True)):
         yield chat_html_wrapper(history, state['name1'], state['name2'], state['mode'], state['chat_style'], state['character_menu']), history
 
-
 def remove_last_message(history):
     if len(history['visible']) > 0 and history['internal'][-1][0] != '<|BEGIN-VISIBLE-CHAT|>':
         last = history['visible'].pop()
@@ -392,24 +262,6 @@ def replace_last_reply(text, state):
         history['visible'][-1][1] = html.escape(text)
         history['internal'][-1][1] = apply_extensions('input', text, state, is_chat=True)
 
-    return history
-
-
-def send_dummy_message(text, state):
-    history = state['history']
-    history['visible'].append([html.escape(text), ''])
-    history['internal'].append([apply_extensions('input', text, state, is_chat=True), ''])
-    return history
-
-
-def send_dummy_reply(text, state):
-    history = state['history']
-    if len(history['visible']) > 0 and not history['visible'][-1][1] == '':
-        history['visible'].append(['', ''])
-        history['internal'].append(['', ''])
-
-    history['visible'][-1][1] = html.escape(text)
-    history['internal'][-1][1] = apply_extensions('input', text, state, is_chat=True)
     return history
 
 

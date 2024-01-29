@@ -36,7 +36,7 @@ def generate_reply(*args, **kwargs):
 
 
 def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
-    pass
+    yield "Respuesta automática"
     ## Find the appropriate generation function
     #generate_func = apply_extensions('custom_generate_reply')
     #if generate_func is None:

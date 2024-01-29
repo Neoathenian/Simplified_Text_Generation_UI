@@ -23,7 +23,7 @@ from modules.grammar.grammar_utils import initialize_grammar
 from modules.grammar.logits_process import GrammarConstrainedLogitsProcessor
 from modules.html_generator import generate_4chan_html, generate_basic_html
 from modules.logging_colors import logger
-from modules.models import clear_torch_cache, local_rank
+#from modules.models import clear_torch_cache, local_rank
 
 
 def generate_reply(*args, **kwargs):
@@ -36,84 +36,84 @@ def generate_reply(*args, **kwargs):
 
 
 def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
-
-    # Find the appropriate generation function
-    generate_func = apply_extensions('custom_generate_reply')
-    if generate_func is None:
-        if shared.model_name == 'None' or shared.model is None:
-            logger.error("No model is loaded! Select one in the Model tab.")
-            yield ''
-            return
-
-        if shared.model.__class__.__name__ in ['LlamaCppModel', 'Exllamav2Model', 'CtransformersModel']:
-            generate_func = generate_reply_custom
-        else:
-            generate_func = generate_reply_HF
-
-    # Prepare the input
-    original_question = question
-    if not is_chat:
-        state = apply_extensions('state', state)
-        question = apply_extensions('input', question, state)
-
-    # Find the stopping strings
-    all_stop_strings = []
-    for st in (stopping_strings, state['custom_stopping_strings']):
-        if type(st) is str:
-            st = ast.literal_eval(f"[{st}]")
-
-        if type(st) is list and len(st) > 0:
-            all_stop_strings += st
-
-    if shared.args.verbose:
-        logger.info("PROMPT=")
-        print(question)
-
-    shared.stop_everything = False
-    clear_torch_cache()
-    seed = set_manual_seed(state['seed'])
-    last_update = -1
-    reply = ''
-    is_stream = state['stream']
-    if len(all_stop_strings) > 0 and not state['stream']:
-        state = copy.deepcopy(state)
-        state['stream'] = True
-
-    min_update_interval = 0
-    if state.get('max_updates_second', 0) > 0:
-        min_update_interval = 1 / state['max_updates_second']
-
-    # Generate
-    for reply in generate_func(question, original_question, seed, state, stopping_strings, is_chat=is_chat):
-        reply, stop_found = apply_stopping_strings(reply, all_stop_strings)
-        if escape_html:
-            reply = html.escape(reply)
-        if is_stream:
-            cur_time = time.time()
-
-            # Maximum number of tokens/second
-            if state['max_tokens_second'] > 0:
-                diff = 1 / state['max_tokens_second'] - (cur_time - last_update)
-                if diff > 0:
-                    time.sleep(diff)
-
-                last_update = time.time()
-                yield reply
-
-            # Limit updates to avoid lag in the Gradio UI
-            # API updates are not limited
-            else:
-                if cur_time - last_update > min_update_interval:
-                    last_update = cur_time
-                    yield reply
-
-        if stop_found or (state['max_tokens_second'] > 0 and shared.stop_everything):
-            break
-
-    if not is_chat:
-        reply = apply_extensions('output', reply, state)
-
-    yield reply
+    pass
+    ## Find the appropriate generation function
+    #generate_func = apply_extensions('custom_generate_reply')
+    #if generate_func is None:
+    #    if shared.model_name == 'None' or shared.model is None:
+    #        logger.error("No model is loaded! Select one in the Model tab.")
+    #        yield ''
+    #        return
+#
+    #    if shared.model.__class__.__name__ in ['LlamaCppModel', 'Exllamav2Model', 'CtransformersModel']:
+    #        generate_func = generate_reply_custom
+    #    else:
+    #        generate_func = generate_reply_HF
+#
+    ## Prepare the input
+    #original_question = question
+    #if not is_chat:
+    #    state = apply_extensions('state', state)
+    #    question = apply_extensions('input', question, state)
+#
+    ## Find the stopping strings
+    #all_stop_strings = []
+    #for st in (stopping_strings, state['custom_stopping_strings']):
+    #    if type(st) is str:
+    #        st = ast.literal_eval(f"[{st}]")
+#
+    #    if type(st) is list and len(st) > 0:
+    #        all_stop_strings += st
+#
+    #if shared.args.verbose:
+    #    logger.info("PROMPT=")
+    #    print(question)
+#
+    #shared.stop_everything = False
+    #clear_torch_cache()
+    #seed = set_manual_seed(state['seed'])
+    #last_update = -1
+    #reply = ''
+    #is_stream = state['stream']
+    #if len(all_stop_strings) > 0 and not state['stream']:
+    #    state = copy.deepcopy(state)
+    #    state['stream'] = True
+#
+    #min_update_interval = 0
+    #if state.get('max_updates_second', 0) > 0:
+    #    min_update_interval = 1 / state['max_updates_second']
+#
+    ## Generate
+    #for reply in generate_func(question, original_question, seed, state, stopping_strings, is_chat=is_chat):
+    #    reply, stop_found = apply_stopping_strings(reply, all_stop_strings)
+    #    if escape_html:
+    #        reply = html.escape(reply)
+    #    if is_stream:
+    #        cur_time = time.time()
+#
+    #        # Maximum number of tokens/second
+    #        if state['max_tokens_second'] > 0:
+    #            diff = 1 / state['max_tokens_second'] - (cur_time - last_update)
+    #            if diff > 0:
+    #                time.sleep(diff)
+#
+    #            last_update = time.time()
+    #            yield reply
+#
+    #        # Limit updates to avoid lag in the Gradio UI
+    #        # API updates are not limited
+    #        else:
+    #            if cur_time - last_update > min_update_interval:
+    #                last_update = cur_time
+    #                yield reply
+#
+    #    if stop_found or (state['max_tokens_second'] > 0 and shared.stop_everything):
+    #        break
+#
+    #if not is_chat:
+    #    reply = apply_extensions('output', reply, state)
+#
+    #yield reply
 
 
 def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_length=None):
@@ -136,8 +136,8 @@ def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_lengt
 
     if shared.model.__class__.__name__ in ['LlamaCppModel', 'Exllamav2Model', 'CtransformersModel'] or shared.args.cpu:
         return input_ids
-    elif shared.args.deepspeed:
-        return input_ids.to(device=local_rank)
+    #elif shared.args.deepspeed:
+    #    return input_ids.to(device=local_rank)
     elif torch.backends.mps.is_available():
         device = torch.device('mps')
         return input_ids.to(device)

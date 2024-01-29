@@ -38,25 +38,20 @@ import yaml
 import modules.extensions as extensions_module
 from modules import (
     chat,
-    #training,
     ui,
     ui_chat,
-    #ui_default,
     ui_file_saving,
-    #ui_model_menu,
-    #ui_notebook,
     ui_parameters,
-    #ui_session,
     utils
 )
 from modules.extensions import apply_extensions
-from modules.LoRA import add_lora_to_model
-from modules.models import load_model
-from modules.models_settings import (
-    get_fallback_settings,
-    get_model_metadata,
-    update_model_parameters
-)
+#from modules.LoRA import add_lora_to_model
+#from modules.models import load_model
+#from modules.models_settings import (
+#    get_fallback_settings,
+#    get_model_metadata,
+#    update_model_parameters
+#)
 from modules.shared import do_cmd_flags_warnings
 from modules.utils import gradio
 
@@ -126,23 +121,15 @@ def create_interface():
 
         # Text Generation tab
         ui_chat.create_ui()
-        #ui_default.create_ui()
-       # ui_notebook.create_ui()
 
         ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
-        #ui_model_menu.create_ui()  # Model tab
-        #training.create_ui()  # Training tab
-        #ui_session.create_ui()  # Session tab
 
         # Generation events
         ui_chat.create_event_handlers()
-        #ui_default.create_event_handlers()
-        #ui_notebook.create_event_handlers()
 
         # Other events
         ui_file_saving.create_event_handlers()
         ui_parameters.create_event_handlers()
-        #ui_model_menu.create_event_handlers()
 
         # Interface launch events
         if shared.settings['dark_theme']:
@@ -193,8 +180,8 @@ if __name__ == "__main__":
         shared.settings.update(new_settings)
 
     # Fallback settings for models
-    shared.model_config['.*'] = get_fallback_settings()
-    shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
+    #shared.model_config['.*'] = get_fallback_settings()
+    #shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
 
     # Activate the extensions listed on settings.yaml
     extensions_module.available_extensions = utils.get_available_extensions()
@@ -234,13 +221,13 @@ if __name__ == "__main__":
         else:
             model_name = shared.model_name
 
-        model_settings = get_model_metadata(model_name)
-        update_model_parameters(model_settings, initial=True)  # hijack the command-line arguments
+        #model_settings = get_model_metadata(model_name)
+        #update_model_parameters(model_settings, initial=True)  # hijack the command-line arguments
 
         # Load the model
-        shared.model, shared.tokenizer = load_model(model_name)
-        if shared.args.lora:
-            add_lora_to_model(shared.args.lora)
+        #shared.model, shared.tokenizer = load_model(model_name)
+        #if shared.args.lora:
+        #    add_lora_to_model(shared.args.lora)
 
     shared.generation_lock = Lock()
 

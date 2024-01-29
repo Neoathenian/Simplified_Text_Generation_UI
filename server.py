@@ -43,7 +43,7 @@ from modules import (
     ui_chat,
     #ui_default,
     ui_file_saving,
-    ui_model_menu,
+    #ui_model_menu,
     #ui_notebook,
     ui_parameters,
     #ui_session,
@@ -88,13 +88,13 @@ def create_interface():
 
     # Force some events to be triggered on page load
     shared.persistent_interface_state.update({
-        'loader': shared.args.loader or 'Transformers',
+        #'loader': shared.args.loader or 'Transformers',
         'mode': shared.settings['mode'],
         'character_menu': shared.args.character or shared.settings['character'],
         'instruction_template_str': shared.settings['instruction_template_str'],
         'prompt_menu-default': shared.settings['prompt-default'],
         'prompt_menu-notebook': shared.settings['prompt-notebook'],
-        'filter_by_loader': shared.args.loader or 'All'
+        #'filter_by_loader': shared.args.loader or 'All'
     })
 
     if Path("cache/pfp_character.png").exists():
@@ -130,7 +130,7 @@ def create_interface():
        # ui_notebook.create_ui()
 
         ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
-        ui_model_menu.create_ui()  # Model tab
+        #ui_model_menu.create_ui()  # Model tab
         #training.create_ui()  # Training tab
         #ui_session.create_ui()  # Session tab
 
@@ -142,7 +142,7 @@ def create_interface():
         # Other events
         ui_file_saving.create_event_handlers()
         ui_parameters.create_event_handlers()
-        ui_model_menu.create_event_handlers()
+        #ui_model_menu.create_event_handlers()
 
         # Interface launch events
         if shared.settings['dark_theme']:

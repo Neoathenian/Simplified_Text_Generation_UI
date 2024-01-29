@@ -38,7 +38,7 @@ import yaml
 import modules.extensions as extensions_module
 from modules import (
     chat,
-    training,
+    #training,
     ui,
     ui_chat,
     #ui_default,
@@ -131,7 +131,7 @@ def create_interface():
 
         ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
         ui_model_menu.create_ui()  # Model tab
-        training.create_ui()  # Training tab
+        #training.create_ui()  # Training tab
         #ui_session.create_ui()  # Session tab
 
         # Generation events

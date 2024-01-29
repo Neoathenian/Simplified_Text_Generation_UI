@@ -45,13 +45,6 @@ from modules import (
     utils
 )
 from modules.extensions import apply_extensions
-#from modules.LoRA import add_lora_to_model
-#from modules.models import load_model
-#from modules.models_settings import (
-#    get_fallback_settings,
-#    get_model_metadata,
-#    update_model_parameters
-#)
 from modules.shared import do_cmd_flags_warnings
 from modules.utils import gradio
 
@@ -69,7 +62,7 @@ def create_interface():
     title = 'Text generation web UI'
 
     # Password authentication
-    auth = []
+    auth = []#["admin:admin"] example user password
     if shared.args.gradio_auth:
         auth.extend(x.strip() for x in shared.args.gradio_auth.strip('"').replace('\n', '').split(',') if x.strip())
     if shared.args.gradio_auth_path:
@@ -79,6 +72,7 @@ def create_interface():
 
     # Import the extensions and execute their setup() functions
     if shared.args.extensions is not None and len(shared.args.extensions) > 0:
+        #We´re actually only importing the gallery extension here, but it might be useful for me later
         extensions_module.load_extensions()
 
     # Force some events to be triggered on page load
@@ -86,9 +80,9 @@ def create_interface():
         #'loader': shared.args.loader or 'Transformers',
         'mode': shared.settings['mode'],
         'character_menu': shared.args.character or shared.settings['character'],
-        'instruction_template_str': shared.settings['instruction_template_str'],
-        'prompt_menu-default': shared.settings['prompt-default'],
-        'prompt_menu-notebook': shared.settings['prompt-notebook'],
+        #'instruction_template_str': shared.settings['instruction_template_str'],
+        #'prompt_menu-default': shared.settings['prompt-default'],
+        #'prompt_menu-notebook': shared.settings['prompt-notebook'],
         #'filter_by_loader': shared.args.loader or 'All'
     })
 
@@ -164,21 +158,6 @@ if __name__ == "__main__":
     logger.info("Starting Text generation web UI")
     do_cmd_flags_warnings()
 
-    # Load custom settings
-    settings_file = None
-    if shared.args.settings is not None and Path(shared.args.settings).exists():
-        settings_file = Path(shared.args.settings)
-    elif Path('settings.yaml').exists():
-        settings_file = Path('settings.yaml')
-    elif Path('settings.json').exists():
-        settings_file = Path('settings.json')
-
-    if settings_file is not None:
-        logger.info(f"Loading settings from {settings_file}")
-        file_contents = open(settings_file, 'r', encoding='utf-8').read()
-        new_settings = json.loads(file_contents) if settings_file.suffix == "json" else yaml.safe_load(file_contents)
-        shared.settings.update(new_settings)
-
     # Fallback settings for models
     #shared.model_config['.*'] = get_fallback_settings()
     #shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
@@ -190,60 +169,15 @@ if __name__ == "__main__":
         if extension not in shared.args.extensions:
             shared.args.extensions.append(extension)
 
-    available_models = utils.get_available_models()
-
-    # Model defined through --model
-    if shared.args.model is not None:
-        shared.model_name = shared.args.model
-
-    # Select the model from a command-line menu
-    elif shared.args.model_menu:
-        if len(available_models) == 0:
-            logger.error('No models are available! Please download at least one.')
-            sys.exit(0)
-        else:
-            print('The following models are available:\n')
-            for i, model in enumerate(available_models):
-                print(f'{i+1}. {model}')
-
-            print(f'\nWhich one do you want to load? 1-{len(available_models)}\n')
-            i = int(input()) - 1
-            print()
-
-        shared.model_name = available_models[i]
-
-    # If any model has been selected, load it
-    if shared.model_name != 'None':
-        p = Path(shared.model_name)
-        if p.exists():
-            model_name = p.parts[-1]
-            shared.model_name = model_name
-        else:
-            model_name = shared.model_name
-
-        #model_settings = get_model_metadata(model_name)
-        #update_model_parameters(model_settings, initial=True)  # hijack the command-line arguments
-
-        # Load the model
-        #shared.model, shared.tokenizer = load_model(model_name)
-        #if shared.args.lora:
-        #    add_lora_to_model(shared.args.lora)
-
     shared.generation_lock = Lock()
 
-    if shared.args.nowebui:
-        # Start the API in standalone mode
-        shared.args.extensions = [x for x in shared.args.extensions if x != 'gallery']
-        if shared.args.extensions is not None and len(shared.args.extensions) > 0:
-            extensions_module.load_extensions()
-    else:
-        # Launch the web UI
-        create_interface()
-        while True:
+    # Launch the web UI
+    create_interface()
+    while True:
+        time.sleep(0.5)
+        if shared.need_restart:
+            shared.need_restart = False
             time.sleep(0.5)
-            if shared.need_restart:
-                shared.need_restart = False
-                time.sleep(0.5)
-                shared.gradio['interface'].close()
-                time.sleep(0.5)
-                create_interface()
+            shared.gradio['interface'].close()
+            time.sleep(0.5)
+            create_interface()

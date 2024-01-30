@@ -32,7 +32,7 @@ import time
 from functools import partial
 from pathlib import Path
 from threading import Lock
-
+from time import sleep
 import yaml
 
 import modules.extensions as extensions_module
@@ -47,6 +47,7 @@ from modules import (
 from modules.extensions import apply_extensions
 from modules.shared import do_cmd_flags_warnings
 from modules.utils import gradio
+from modules import globals
 
 
 def signal_handler(sig, frame):
@@ -77,13 +78,8 @@ def create_interface():
 
     # Force some events to be triggered on page load
     shared.persistent_interface_state.update({
-        #'loader': shared.args.loader or 'Transformers',
         'mode': shared.settings['mode'],
         'character_menu': shared.args.character or shared.settings['character'],
-        #'instruction_template_str': shared.settings['instruction_template_str'],
-        #'prompt_menu-default': shared.settings['prompt-default'],
-        #'prompt_menu-notebook': shared.settings['prompt-notebook'],
-        #'filter_by_loader': shared.args.loader or 'All'
     })
 
     if Path("cache/pfp_character.png").exists():
@@ -152,15 +148,18 @@ def create_interface():
             ssl_certfile=shared.args.ssl_certfile
         )
 
-
 if __name__ == "__main__":
+    ##################################
+    #Added by me
+    ##################################
+    globals.Start_client()
+    print("client started",globals.client)
+    ##################################
+
+
 
     logger.info("Starting Text generation web UI")
     do_cmd_flags_warnings()
-
-    # Fallback settings for models
-    #shared.model_config['.*'] = get_fallback_settings()
-    #shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
 
     # Activate the extensions listed on settings.yaml
     extensions_module.available_extensions = utils.get_available_extensions()

@@ -464,6 +464,7 @@ def generate_pfp_cache(character):
 
 
 def load_character(character, name1, name2):
+    print(character,name1,name2)
     context = greeting = ""
     greeting_field = 'greeting'
     picture = None

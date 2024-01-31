@@ -5,6 +5,7 @@ load_dotenv()
 client=None
 thread=None
 
+current_assistant_key=None
 
 def Start_client():
     global client

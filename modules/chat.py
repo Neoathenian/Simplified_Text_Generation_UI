@@ -80,12 +80,12 @@ def get_stopping_strings(state):
     stopping_strings = []
     renderers = []
 
-    if state['mode'] in ['instruct', 'chat-instruct']:
-        template = jinja_env.from_string(state['instruction_template_str'])
-        renderer = partial(template.render, add_generation_prompt=False)
-        renderers.append(renderer)
+    #if state['mode'] in ['instruct', 'chat-instruct']:
+    #    template = jinja_env.from_string(state['instruction_template_str'])
+    #    renderer = partial(template.render, add_generation_prompt=False)
+    #    renderers.append(renderer)
 
-    if state['mode'] in ['chat', 'chat-instruct']:
+    if True:#state['mode'] in ['chat', 'chat-instruct']:
         template = jinja_env.from_string(state['chat_template_str'])
         renderer = partial(template.render, add_generation_prompt=False, name1=state['name1'], name2=state['name2'])
         renderers.append(renderer)
@@ -165,8 +165,8 @@ def chatbot_wrapper(text, state, regenerate=False, _continue=False, loading_mess
 
         # Extract the reply
         visible_reply = reply
-        if state['mode'] in ['chat', 'chat-instruct']:
-            visible_reply = re.sub("(<USER>|<user>|{{user}})", state['name1'], reply)
+        #if state['mode'] in ['chat', 'chat-instruct']:
+        visible_reply = re.sub("(<USER>|<user>|{{user}})", state['name1'], reply)
 
         visible_reply = html.escape(visible_reply)
 
@@ -203,7 +203,7 @@ def generate_chat_reply(text, state, regenerate=False, _continue=False, loading_
 
 
 def character_is_loaded(state, raise_exception=False):
-    if state['mode'] in ['chat', 'chat-instruct'] and state['name2'] == '':
+    if state['name2'] == '':
         logger.error('It looks like no character is loaded. Please load one under Parameters > Character.')
         if raise_exception:
             raise ValueError
@@ -221,17 +221,17 @@ def generate_chat_reply_wrapper(text, state, regenerate=False, _continue=False):
     if not character_is_loaded(state):
         return
 
-    if state['start_with'] != '' and not _continue:
-        if regenerate:
-            text, state['history'] = remove_last_message(state['history'])
-            regenerate = False
-
-        _continue = True
-        send_dummy_message(text, state)
-        send_dummy_reply(state['start_with'], state)
+    #if state['start_with'] != '' and not _continue:
+    #    if regenerate:
+    #        text, state['history'] = remove_last_message(state['history'])
+    #        regenerate = False
+#
+    #    _continue = True
+    #    send_dummy_message(text, state)
+    #    send_dummy_reply(state['start_with'], state)
 
     for i, history in enumerate(generate_chat_reply(text, state, regenerate, _continue, loading_message=True, for_ui=True)):
-        yield chat_html_wrapper(history, state['name1'], state['name2'], state['mode'], state['chat_style'], state['character_menu']), history
+        yield chat_html_wrapper(history, state['name1'], state['name2'], state['character_menu']), history
 
 def remove_last_message(history):
     if len(history['visible']) > 0 and history['internal'][-1][0] != '<|BEGIN-VISIBLE-CHAT|>':
@@ -262,8 +262,8 @@ def replace_last_reply(text, state):
     return history
 
 
-def redraw_html(history, name1, name2, mode, style, character, reset_cache=False):
-    return chat_html_wrapper(history, name1, name2, mode, style, character, reset_cache=reset_cache)
+def redraw_html(history, name1, name2,  character, reset_cache=False):
+    return chat_html_wrapper(history, name1, name2,  character, reset_cache=reset_cache)
 
 
 def start_new_chat(state):
@@ -274,35 +274,35 @@ def start_new_chat(state):
     ##################################
 
 
-    mode = state['mode']
+    #mode = state['mode']
     history = {'internal': [], 'visible': []}
 
-    if mode != 'instruct':
+    if True:#mode != 'instruct':
         greeting = replace_character_names(state['greeting'], state['name1'], state['name2'])
         if greeting != '':
             history['internal'] += [['<|BEGIN-VISIBLE-CHAT|>', greeting]]
             history['visible'] += [['', apply_extensions('output', greeting, state, is_chat=True)]]
 
     unique_id = datetime.now().strftime('%Y%m%d-%H-%M-%S')
-    save_history(history, unique_id, state['character_menu'], state['mode'])
+    save_history(history, unique_id, state['character_menu'])#, state['mode'])
 
     return history
 
 
-def get_history_file_path(unique_id, character, mode):
-    if mode == 'instruct':
-        p = Path(f'logs/instruct/{unique_id}.json')
-    else:
-        p = Path(f'logs/chat/{character}/{unique_id}.json')
+def get_history_file_path(unique_id, character):#, mode):
+    #if mode == 'instruct':
+    #    p = Path(f'logs/instruct/{unique_id}.json')
+    #else:
+    p = Path(f'logs/chat/{character}/{unique_id}.json')
 
     return p
 
 
-def save_history(history, unique_id, character, mode):
+def save_history(history, unique_id, character):#, mode):
     if shared.args.multi_user:
         return
 
-    p = get_history_file_path(unique_id, character, mode)
+    p = get_history_file_path(unique_id, character)#, mode)
     if not p.parent.is_dir():
         p.parent.mkdir(parents=True)
 
@@ -310,12 +310,12 @@ def save_history(history, unique_id, character, mode):
         f.write(json.dumps(history, indent=4))
 
 
-def rename_history(old_id, new_id, character, mode):
+def rename_history(old_id, new_id, character):#, mode):
     if shared.args.multi_user:
         return
 
-    old_p = get_history_file_path(old_id, character, mode)
-    new_p = get_history_file_path(new_id, character, mode)
+    old_p = get_history_file_path(old_id, character)#), mode)
+    new_p = get_history_file_path(new_id, character)#), mode)
     if new_p.parent != old_p.parent:
         logger.error(f"The following path is not allowed: {new_p}.")
     elif new_p == old_p:
@@ -329,9 +329,10 @@ def find_all_histories(state):
     if shared.args.multi_user:
         return ['']
 
-    if state['mode'] == 'instruct':
-        paths = Path('logs/instruct').glob('*.json')
-    else:
+    #if state['mode'] == 'instruct':
+    #    paths = Path('logs/instruct').glob('*.json')
+    #else:
+    if True:
         character = state['character_menu']
 
         # Handle obsolete filenames and paths
@@ -342,7 +343,7 @@ def find_all_histories(state):
             old_p.rename(new_p)
         if new_p.exists():
             unique_id = datetime.now().strftime('%Y%m%d-%H-%M-%S')
-            p = get_history_file_path(unique_id, character, state['mode'])
+            p = get_history_file_path(unique_id, character)#, state['mode'])
             logger.warning(f"Moving {new_p} to {p}")
             p.parent.mkdir(exist_ok=True)
             new_p.rename(p)
@@ -367,7 +368,7 @@ def load_latest_history(state):
     histories = find_all_histories(state)
 
     if len(histories) > 0:
-        history = load_history(histories[0], state['character_menu'], state['mode'])
+        history = load_history(histories[0], state['character_menu'])#, state['mode'])
     else:
         history = start_new_chat(state)
 
@@ -388,7 +389,7 @@ def load_history_after_deletion(state, idx):
     idx = max(0, idx)
 
     if len(histories) > 0:
-        history = load_history(histories[idx], state['character_menu'], state['mode'])
+        history = load_history(histories[idx], state['character_menu'])#, state['mode'])
     else:
         history = start_new_chat(state)
         histories = find_all_histories(state)
@@ -403,8 +404,8 @@ def update_character_menu_after_deletion(idx):
     return gr.update(choices=characters, value=characters[idx])
 
 
-def load_history(unique_id, character, mode):
-    p = get_history_file_path(unique_id, character, mode)
+def load_history(unique_id, character):#, mode):
+    p = get_history_file_path(unique_id, character)#, mode)
 
     f = json.loads(open(p, 'rb').read())
     if 'internal' in f and 'visible' in f:
@@ -435,8 +436,8 @@ def load_history_json(file, history):
         return history
 
 
-def delete_history(unique_id, character, mode):
-    p = get_history_file_path(unique_id, character, mode)
+def delete_history(unique_id, character):#, mode):
+    p = get_history_file_path(unique_id, character)#, mode)
     delete_file(p)
 
 
@@ -482,6 +483,15 @@ def load_character(character, name1, name2):
     file_contents = open(filepath, 'r', encoding='utf-8').read()
     data = json.loads(file_contents) if extension == "json" else yaml.safe_load(file_contents)
     cache_folder = Path(shared.args.disk_cache_dir)
+    
+    ####################################################
+    #Added by me
+    if "assistant_id" in data:
+        globals.current_assistant_key=data["assistant_id"]
+    else:
+        globals.current_assistant_key=None
+    ####################################################
+
 
     for path in [Path(f"{cache_folder}/pfp_character.png"), Path(f"{cache_folder}/pfp_character_thumb.png")]:
         if path.exists():

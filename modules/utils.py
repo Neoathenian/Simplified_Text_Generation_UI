@@ -127,6 +127,7 @@ def get_datasets(path: str, ext: str):
 
 
 def get_available_chat_styles():
+    print(sorted(set(('-'.join(k.stem.split('-')[1:]) for k in Path('css').glob('chat_style*.css'))), key=natural_keys))
     return sorted(set(('-'.join(k.stem.split('-')[1:]) for k in Path('css').glob('chat_style*.css'))), key=natural_keys)
 
 

@@ -223,6 +223,9 @@ def generate_instruct_html(history):
 
 
 def generate_cai_chat_html(history, name1, name2, style, character, reset_cache=False):
+    #print("chat_styles",chat_styles)
+    #print("style",style)
+    style="cai-chat"#This is a temp fix
     output = f'<style>{chat_styles[style]}</style><div class="chat" id="chat"><div class="messages">'
 
     # We use ?character and ?time.time() to force the browser to reset caches
@@ -300,10 +303,11 @@ def generate_chat_html(history, name1, name2, reset_cache=False):
     return output
 
 
-def chat_html_wrapper(history, name1, name2, mode, style, character, reset_cache=False):
-    if mode == 'instruct':
-        return generate_instruct_html(history['visible'])
-    elif style == 'wpp':
+def chat_html_wrapper(history, name1, name2, character, reset_cache=False):
+    #if mode == 'instruct':
+    #    return generate_instruct_html(history['visible'])
+    style="chat"
+    if style == 'wpp':
         return generate_chat_html(history['visible'], name1, name2)
     else:
         return generate_cai_chat_html(history['visible'], name1, name2, style, character, reset_cache)

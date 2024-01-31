@@ -158,18 +158,18 @@ def list_interface_input_elements():
     # Chat elements
     elements += [
         'textbox',
-        'start_with',
+        #'start_with',
         'character_menu',
         'history',
         'name1',
         'name2',
         'greeting',
         'context',
-        'mode',
+        #'mode',
         'custom_system_message',
         'instruction_template_str',
         'chat_template_str',
-        'chat_style',
+        #'chat_style',
         'chat-instruct_command',
     ]
 

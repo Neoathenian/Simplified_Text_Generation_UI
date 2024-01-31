@@ -1,29 +1,6 @@
-import ast
-import copy
-import html
-import pprint
-import random
-import re
-import time
-import traceback
 from time import sleep
-import numpy as np
-import torch
-import transformers
-from transformers import LogitsProcessorList, is_torch_xpu_available
-
 import modules.shared as shared
-from modules.callbacks import (
-    Iteratorize,
-    Stream,
-    _StopEverythingStoppingCriteria
-)
-from modules.extensions import apply_extensions
-from modules.grammar.grammar_utils import initialize_grammar
-from modules.grammar.logits_process import GrammarConstrainedLogitsProcessor
-from modules.html_generator import generate_4chan_html, generate_basic_html
 from modules.logging_colors import logger
-#from modules.models import clear_torch_cache, local_rank
 from modules import globals
 
 def generate_reply(*args, **kwargs):
@@ -33,18 +10,6 @@ def generate_reply(*args, **kwargs):
             yield result
     finally:
         shared.generation_lock.release()
-
-#Here´s where you actually generate the replies
-#def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
-    #yield "Respuesta Rapida"
-#    print("The question is", question)
-#    print("state", state)
-#    print("stopping_strings", stopping_strings)
-#    print("is_chat", is_chat)
-#    print("escape_html", escape_html)
-#    print("for_ui", for_ui)
-#    yield "Respuesta automática"
-
 
 def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
     if globals.current_assistant_key is None:

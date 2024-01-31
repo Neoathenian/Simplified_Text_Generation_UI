@@ -2,9 +2,7 @@ import copy
 from pathlib import Path
 
 import gradio as gr
-import torch
 import yaml
-from transformers import is_torch_xpu_available
 
 import extensions
 from modules import shared
@@ -42,68 +40,6 @@ if Path("notification.mp3").exists():
     audio_notification_js = "document.querySelector('#audio_notification audio')?.play();"
 else:
     audio_notification_js = ""
-
-
-def list_model_elements():
-    elements = [
-        #'loader',
-        #'filter_by_loader',
-        #'cpu_memory',
-        #'auto_devices',
-        #'disk',
-        #'cpu',
-        #'bf16',
-        #'load_in_8bit',
-        #'trust_remote_code',
-        #'no_use_fast',
-        #'use_flash_attention_2',
-        #'load_in_4bit',
-        #'compute_dtype',
-        #'quant_type',
-        #'use_double_quant',
-        #'wbits',
-        #'groupsize',
-        #'model_type',
-        #'pre_layer',
-        #'triton',
-        #'desc_act',
-        #'no_inject_fused_attention',
-        #'no_inject_fused_mlp',
-        #'no_use_cuda_fp16',
-        #'disable_exllama',
-        #'disable_exllamav2',
-        #'cfg_cache',
-        #'no_flash_attn',
-        #'num_experts_per_token',
-        #'cache_8bit',
-        #'threads',
-        #'threads_batch',
-        #'n_batch',
-        #'no_mmap',
-        #'mlock',
-        #'no_mul_mat_q',
-        #'n_gpu_layers',
-        #'tensor_split',
-        #'n_ctx',
-        #'gpu_split',
-        #'max_seq_len',
-        #'compress_pos_emb',
-        #'alpha_value',
-        #'rope_freq_base',
-        #'numa',
-        #'logits_all',
-        #'no_offload_kqv',
-        #'tensorcores',
-        #'hqq_backend',
-    ]
-    if is_torch_xpu_available():
-        for i in range(torch.xpu.device_count()):
-            elements.append(f'gpu_memory_{i}')
-    else:
-        for i in range(torch.cuda.device_count()):
-            elements.append(f'gpu_memory_{i}')
-
-    return elements
 
 
 def list_interface_input_elements():
@@ -173,18 +109,6 @@ def list_interface_input_elements():
         'chat-instruct_command',
     ]
 
-    # Notebook/default elements
-    elements += [
-        #'textbox-notebook',
-        #'textbox-default',
-        #'output_textbox',
-        #'prompt_menu-default',
-        #'prompt_menu-notebook',
-    ]
-
-    # Model elements
-    elements += list_model_elements()
-
     return elements
 
 
@@ -208,41 +132,6 @@ def apply_interface_values(state, use_persistent=False):
         return [gr.update() for k in elements]  # Dummy, do nothing
     else:
         return [state[k] if k in state else gr.update() for k in elements]
-
-
-def save_settings(state, preset, extensions_list, show_controls, theme_state):
-    output = copy.deepcopy(shared.settings)
-    exclude = ['name2', 'greeting', 'context', 'turn_template']
-    for k in state:
-        if k in shared.settings and k not in exclude:
-            output[k] = state[k]
-
-    output['preset'] = preset
-    output['prompt-default'] = state['prompt_menu-default']
-    output['prompt-notebook'] = state['prompt_menu-notebook']
-    output['character'] = state['character_menu']
-    output['default_extensions'] = extensions_list
-    output['seed'] = int(output['seed'])
-    output['show_controls'] = show_controls
-    output['dark_theme'] = True if theme_state == 'dark' else False
-
-    # Save extension values in the UI
-    for extension_name in extensions_list:
-        extension = getattr(extensions, extension_name).script
-        if hasattr(extension, 'params'):
-            params = getattr(extension, 'params')
-            for param in params:
-                _id = f"{extension_name}-{param}"
-                # Only save if different from default value
-                if param not in shared.default_settings or params[param] != shared.default_settings[param]:
-                    output[_id] = params[param]
-
-    # Do not save unchanged settings
-    for key in list(output.keys()):
-        if key in shared.default_settings and output[key] == shared.default_settings[key]:
-            output.pop(key)
-
-    return yaml.dump(output, sort_keys=False, width=float("inf"))
 
 
 def create_refresh_button(refresh_component, refresh_method, refreshed_args, elem_class, interactive=True):

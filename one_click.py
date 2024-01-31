@@ -168,20 +168,20 @@ def run_cmd(cmd, assert_success=False, environment=False, capture_output=False, 
 def install_webui():
 
     #Install torch for cpu   
-    with open(cmd_flags_path, 'r+') as cmd_flags_file:
-        if "--cpu" not in cmd_flags_file.read():
-            print_big_message("Adding the --cpu flag to CMD_FLAGS.txt.")
-            cmd_flags_file.write("\n--cpu")
+    ##with open(cmd_flags_path, 'r+') as cmd_flags_file:
+    ##    if "--cpu" not in cmd_flags_file.read():
+    ##        print_big_message("Adding the --cpu flag to CMD_FLAGS.txt.")
+    ##        cmd_flags_file.write("\n--cpu")
 
     # Find the proper Pytorch installation command
     install_git = "conda install -y -k ninja git"
-    install_pytorch = "python -m pip install torch==2.1.* torchvision==0.16.* torchaudio==2.1.* "
+    ##install_pytorch = "python -m pip install torch==2.1.* torchvision==0.16.* torchaudio==2.1.* "
 
-    use_cuda118 = "N"
+    #use_cuda118 = "N"
     
     # Install Git and then Pytorch
     print_big_message("Installing PyTorch.")
-    run_cmd(f"{install_git} && {install_pytorch} && python -m pip install py-cpuinfo==9.0.0", assert_success=True, environment=True)
+    run_cmd(f"{install_git} && python -m pip install py-cpuinfo==9.0.0", assert_success=True, environment=True)
 
     
     # Install the webui requirements
@@ -228,37 +228,37 @@ def update_requirements(initial_installation=False):
     elif initial_installation:
         print_big_message("Will not install extensions due to INSTALL_EXTENSIONS environment variable.")
 
-    # Detect the Python and PyTorch versions
-    torver = torch_version()
-    is_cuda = '+cu' in torver
-    is_cuda118 = '+cu118' in torver  # 2.1.0+cu118
-    is_cuda117 = '+cu117' in torver  # 2.0.1+cu117
-    is_rocm = '+rocm' in torver  # 2.0.1+rocm5.4.2
-    is_intel = '+cxx11' in torver  # 2.0.1a0+cxx11.abi
-    is_cpu = '+cpu' in torver  # 2.0.1+cpu
+    ### Detect the Python and PyTorch versions
+    ##torver = torch_version()
+    ##is_cuda = '+cu' in torver
+    ##is_cuda118 = '+cu118' in torver  # 2.1.0+cu118
+    ##is_cuda117 = '+cu117' in torver  # 2.0.1+cu117
+    ##is_rocm = '+rocm' in torver  # 2.0.1+rocm5.4.2
+    ##is_intel = '+cxx11' in torver  # 2.0.1a0+cxx11.abi
+    ##is_cpu = '+cpu' in torver  # 2.0.1+cpu
 
-    if is_rocm:
-        base_requirements = "requirements_amd" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
-    elif is_cpu or is_intel:
-        base_requirements = "requirements_cpu_only" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
-    elif is_macos():
-        base_requirements = "requirements_apple_" + ("intel" if is_x86_64() else "silicon") + ".txt"
-    else:
-        base_requirements = "requirements" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
+    #if is_rocm:
+    #    base_requirements = "requirements_amd" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
+    #elif is_cpu or is_intel:
+    base_requirements = "requirements_cpu_only" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
+    #elif is_macos():
+    #    base_requirements = "requirements_apple_" + ("intel" if is_x86_64() else "silicon") + ".txt"
+    #else:
+    #    base_requirements = "requirements" + ("_noavx2" if not cpu_has_avx2() else "") + ".txt"
 
     requirements_file = base_requirements
 
     print_big_message(f"Installing webui requirements from file: {requirements_file}")
-    print(f"TORCH: {torver}\n")
+    #print(f"TORCH: {torver}\n")
 
-    # Prepare the requirements file
+    ### Prepare the requirements file
     textgen_requirements = open(requirements_file).read().splitlines()
-    if is_cuda117:
-        textgen_requirements = [req.replace('+cu121', '+cu117').replace('+cu122', '+cu117').replace('torch2.1', 'torch2.0') for req in textgen_requirements]
-    elif is_cuda118:
-        textgen_requirements = [req.replace('+cu121', '+cu118').replace('+cu122', '+cu118') for req in textgen_requirements]
-    if is_windows() and (is_cuda117 or is_cuda118):  # No flash-attention on Windows for CUDA 11
-        textgen_requirements = [req for req in textgen_requirements if 'jllllll/flash-attention' not in req]
+    ##if is_cuda117:
+    ##    textgen_requirements = [req.replace('+cu121', '+cu117').replace('+cu122', '+cu117').replace('torch2.1', 'torch2.0') for req in textgen_requirements]
+    ##elif is_cuda118:
+    ##    textgen_requirements = [req.replace('+cu121', '+cu118').replace('+cu122', '+cu118') for req in textgen_requirements]
+    ##if is_windows() and (is_cuda117 or is_cuda118):  # No flash-attention on Windows for CUDA 11
+    textgen_requirements = [req for req in textgen_requirements if 'jllllll/flash-attention' not in req]
 
     with open('temp_requirements.txt', 'w') as file:
         file.write('\n'.join(textgen_requirements))
@@ -280,10 +280,10 @@ def update_requirements(initial_installation=False):
     run_cmd("python -m pip install -r temp_requirements.txt --upgrade", assert_success=True, environment=True)
     os.remove('temp_requirements.txt')
 
-    # Check for '+cu' or '+rocm' in version string to determine if torch uses CUDA or ROCm. Check for pytorch-cuda as well for backwards compatibility
-    if not any((is_cuda, is_rocm)) and run_cmd("conda list -f pytorch-cuda | grep pytorch-cuda", environment=True, capture_output=True).returncode == 1:
-        clear_cache()
-        return
+    ## Check for '+cu' or '+rocm' in version string to determine if torch uses CUDA or ROCm. Check for pytorch-cuda as well for backwards compatibility
+    #if not any((is_cuda, is_rocm)) and run_cmd("conda list -f pytorch-cuda | grep pytorch-cuda", environment=True, capture_output=True).returncode == 1:
+    #    clear_cache()
+    #    return
 
     if not os.path.exists("repositories/"):
         os.mkdir("repositories")

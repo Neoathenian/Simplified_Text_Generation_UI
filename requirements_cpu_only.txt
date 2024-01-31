@@ -1,3 +1,5 @@
+openai
+python-dotenv
 accelerate==0.25.*
 colorama
 datasets

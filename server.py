@@ -3,7 +3,7 @@ import warnings
 
 from modules import shared
 
-import accelerate  # This early import makes Intel GPUs happy
+#import accelerate  # This early import makes Intel GPUs happy
 
 import modules.one_click_installer_check
 from modules.block_requests import OpenMonkeyPatch, RequestBlocker

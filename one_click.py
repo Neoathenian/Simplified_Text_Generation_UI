@@ -110,7 +110,6 @@ def install_webui():
     install_git = "conda install -y -k ninja git"
 
     run_cmd(f"{install_git}", assert_success=True, environment=True)
-    #run_cmd(f"{install_git} && python -m pip install py-cpuinfo==9.0.0", assert_success=True, environment=True)
     # Install the webui requirements
     update_requirements(initial_installation=True)
 
@@ -155,7 +154,7 @@ def update_requirements(initial_installation=False):
     elif initial_installation:
         print_big_message("Will not install extensions due to INSTALL_EXTENSIONS environment variable.")
 
-    base_requirements = "requirements_cpu_only" + ".txt"
+    base_requirements = "requirements" + ".txt"
  
     requirements_file = base_requirements
     print_big_message(f"Installing webui requirements from file: {requirements_file}")

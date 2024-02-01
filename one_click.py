@@ -41,8 +41,9 @@ def is_installed():
             site_packages_path = sitedir
             break
 
+    #We´re checking if gradio is installed, 
     if site_packages_path:
-        return os.path.isfile(os.path.join(site_packages_path, 'torch', '__init__.py'))
+        return os.path.isfile(os.path.join(site_packages_path, 'gradio', '__init__.py'))
     else:
         return os.path.isdir(conda_env_path)
 
@@ -115,6 +116,7 @@ def install_webui():
 
 
 def update_requirements(initial_installation=False):
+    print("initial_installation",initial_installation)
     # Create .git directory if missing
     if not os.path.isdir(os.path.join(script_dir, ".git")):
         git_creation_cmd = 'git init -b main && git remote add origin https://github.com/oobabooga/text-generation-webui && git fetch && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main && git reset --hard origin/main && git branch --set-upstream-to=origin/main'
@@ -208,6 +210,7 @@ if __name__ == "__main__":
     else:
         # If webui has already been installed, skip and run
         if not is_installed():
+            print("SDFFDSFDS")
             install_webui()
             os.chdir(script_dir)
 

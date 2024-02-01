@@ -40,11 +40,11 @@ def is_installed():
         if "site-packages" in sitedir and conda_env_path in sitedir:
             site_packages_path = sitedir
             break
-
-    if site_packages_path:
-        return os.path.isfile(os.path.join(site_packages_path, 'torch', '__init__.py'))
-    else:
-        return os.path.isdir(conda_env_path)
+    print(conda_env_path)
+    #if site_packages_path:
+    #    return os.path.isfile(os.path.join(site_packages_path, 'torch', '__init__.py'))
+    #else:
+    return os.path.isdir(conda_env_path)
 
 
 def check_env():
@@ -109,17 +109,17 @@ def run_cmd(cmd, assert_success=False, environment=False, capture_output=False, 
 def install_webui():
     install_git = "conda install -y -k ninja git"
 
-    run_cmd(f"{install_git} && python -m pip install py-cpuinfo==9.0.0", assert_success=True, environment=True)
-    
+    run_cmd(f"{install_git}", assert_success=True, environment=True)
+    #run_cmd(f"{install_git} && python -m pip install py-cpuinfo==9.0.0", assert_success=True, environment=True)
     # Install the webui requirements
     update_requirements(initial_installation=True)
 
 
 def update_requirements(initial_installation=False):
     # Create .git directory if missing
-    if not os.path.isdir(os.path.join(script_dir, ".git")):
-        git_creation_cmd = 'git init -b main && git remote add origin https://github.com/oobabooga/text-generation-webui && git fetch && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main && git reset --hard origin/main && git branch --set-upstream-to=origin/main'
-        run_cmd(git_creation_cmd, environment=True, assert_success=True)
+    #if not os.path.isdir(os.path.join(script_dir, ".git")):
+    #    git_creation_cmd = 'git init -b main && git remote add origin https://github.com/oobabooga/text-generation-webui && git fetch && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main && git reset --hard origin/main && git branch --set-upstream-to=origin/main'
+    #    run_cmd(git_creation_cmd, environment=True, assert_success=True)
 
     files_to_check = [
         'start_linux.sh', 'start_macos.sh', 'start_windows.bat', 'start_wsl.bat',
@@ -209,6 +209,7 @@ if __name__ == "__main__":
     else:
         # If webui has already been installed, skip and run
         if not is_installed():
+            print("HOLLLLLLLLLLLLLLLLLLLL")
             install_webui()
             os.chdir(script_dir)
 

@@ -270,7 +270,8 @@ def start_new_chat(state):
     ##################################
     #Added by me
     ##################################
-    globals.Start_thread() 
+    if globals.current_assistant_key is not None:
+        globals.Start_thread() 
     ##################################
 
 

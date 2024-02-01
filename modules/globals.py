@@ -13,7 +13,10 @@ def Start_client():
 
 def Start_thread(history=[]):
     global thread
+    global client
 
+    if client is None:
+        Start_client()
     #We can´t use any other role other than "user", so we must give it both Question and Answer in that same role :(
     if len(history)>1:
         messages=[{

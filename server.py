@@ -152,8 +152,8 @@ if __name__ == "__main__":
     ##################################
     #Added by me
     ##################################
-    globals.Start_client()
-    print("client started",globals.client)
+    #globals.Start_client()
+    #print("client started",globals.client)
     ##################################
 
 

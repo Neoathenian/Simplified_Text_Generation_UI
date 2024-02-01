@@ -13,7 +13,8 @@ def generate_reply(*args, **kwargs):
 
 def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
     if globals.current_assistant_key is None:
-        yield "Please select an assistant first"
+        yield "Vă rugăm să selectați mai întâi un asistent din fila de selecție a caracterelor de mai jos (derulați în jos)"
+        #yield "Please select an assistant first from the character selection tab below (scroll down)"
         return
     #print(state["history"])
     #Write me a poem of why there are infinite prime numbers

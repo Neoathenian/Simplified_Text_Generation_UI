@@ -40,11 +40,11 @@ def is_installed():
         if "site-packages" in sitedir and conda_env_path in sitedir:
             site_packages_path = sitedir
             break
-    print(conda_env_path)
-    #if site_packages_path:
-    #    return os.path.isfile(os.path.join(site_packages_path, 'torch', '__init__.py'))
-    #else:
-    return os.path.isdir(conda_env_path)
+
+    if site_packages_path:
+        return os.path.isfile(os.path.join(site_packages_path, 'torch', '__init__.py'))
+    else:
+        return os.path.isdir(conda_env_path)
 
 
 def check_env():
@@ -117,9 +117,9 @@ def install_webui():
 
 def update_requirements(initial_installation=False):
     # Create .git directory if missing
-    #if not os.path.isdir(os.path.join(script_dir, ".git")):
-    #    git_creation_cmd = 'git init -b main && git remote add origin https://github.com/oobabooga/text-generation-webui && git fetch && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main && git reset --hard origin/main && git branch --set-upstream-to=origin/main'
-    #    run_cmd(git_creation_cmd, environment=True, assert_success=True)
+    if not os.path.isdir(os.path.join(script_dir, ".git")):
+        git_creation_cmd = 'git init -b main && git remote add origin https://github.com/oobabooga/text-generation-webui && git fetch && git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/main && git reset --hard origin/main && git branch --set-upstream-to=origin/main'
+        run_cmd(git_creation_cmd, environment=True, assert_success=True)
 
     files_to_check = [
         'start_linux.sh', 'start_macos.sh', 'start_windows.bat', 'start_wsl.bat',
@@ -209,7 +209,6 @@ if __name__ == "__main__":
     else:
         # If webui has already been installed, skip and run
         if not is_installed():
-            print("HOLLLLLLLLLLLLLLLLLLLL")
             install_webui()
             os.chdir(script_dir)
 

@@ -2,6 +2,7 @@ from time import sleep
 import modules.shared as shared
 from modules.logging_colors import logger
 from modules import globals
+import re
 
 def generate_reply(*args, **kwargs):
     shared.generation_lock.acquire()
@@ -79,9 +80,16 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False, escap
 
     print("the message should be:", messages.data[0].content[0].text.value)
 
-    yield messages.data[0].content[0].text.value
-   #yield "Soy felix y tengo hambre."
-    
+    yield delete_sursa(messages.data[0].content[0].text.value)
+    #yield "Soy felix y tengo hambre."
+
+
+def delete_sursa(text):
+    result = re.sub(r"【.*?sur.*?】", "", text)
+    result = re.sub(r"【.*?source.*?】", "", result)    
+    return result
+
+
 
 def stop_everything_event():
     #This would be great to fix (but probably a pain)

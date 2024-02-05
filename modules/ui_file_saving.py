@@ -72,32 +72,32 @@ def create_event_handlers():
     shared.gradio['save_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_saver'))
     shared.gradio['delete_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_deleter'))
 
-    shared.gradio['save_preset'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        presets.generate_preset_yaml, gradio('interface_state'), gradio('save_preset_contents')).then(
-        lambda: 'My Preset', None, gradio('save_preset_filename')).then(
-        lambda: gr.update(visible=True), None, gradio('preset_saver'))
+    #shared.gradio['save_preset'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    presets.generate_preset_yaml, gradio('interface_state'), gradio('save_preset_contents')).then(
+    #    lambda: 'My Preset', None, gradio('save_preset_filename')).then(
+    #    lambda: gr.update(visible=True), None, gradio('preset_saver'))
 
-    shared.gradio['save_preset_confirm'].click(
-        lambda x, y: utils.save_file(f'presets/{x}.yaml', y), gradio('save_preset_filename', 'save_preset_contents'), None).then(
-        lambda: gr.update(visible=False), None, gradio('preset_saver')).then(
-        lambda x: gr.update(choices=utils.get_available_presets(), value=x), gradio('save_preset_filename'), gradio('preset_menu'))
+    #shared.gradio['save_preset_confirm'].click(
+    #    lambda x, y: utils.save_file(f'presets/{x}.yaml', y), gradio('save_preset_filename', 'save_preset_contents'), None).then(
+    #    lambda: gr.update(visible=False), None, gradio('preset_saver')).then(
+    #    lambda x: gr.update(choices=utils.get_available_presets(), value=x), gradio('save_preset_filename'), gradio('preset_menu'))
 
     shared.gradio['save_preset_cancel'].click(lambda: gr.update(visible=False), None, gradio('preset_saver'))
 
-    shared.gradio['delete_preset'].click(
-        lambda x: f'{x}.yaml', gradio('preset_menu'), gradio('delete_filename')).then(
-        lambda: 'presets/', None, gradio('delete_root')).then(
-        lambda: gr.update(visible=True), None, gradio('file_deleter'))
+    #shared.gradio['delete_preset'].click(
+    #    lambda x: f'{x}.yaml', gradio('preset_menu'), gradio('delete_filename')).then(
+    #    lambda: 'presets/', None, gradio('delete_root')).then(
+    #    lambda: gr.update(visible=True), None, gradio('file_deleter'))
 
-    shared.gradio['save_grammar'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: x, gradio('grammar_string'), gradio('save_contents')).then(
-        lambda: 'grammars/', None, gradio('save_root')).then(
-        lambda: 'My Fancy Grammar.gbnf', None, gradio('save_filename')).then(
-        lambda: gr.update(visible=True), None, gradio('file_saver'))
+    #shared.gradio['save_grammar'].click(
+    #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
+    #    lambda x: x, gradio('grammar_string'), gradio('save_contents')).then(
+    #    lambda: 'grammars/', None, gradio('save_root')).then(
+    #    lambda: 'My Fancy Grammar.gbnf', None, gradio('save_filename')).then(
+    #    lambda: gr.update(visible=True), None, gradio('file_saver'))
 
-    shared.gradio['delete_grammar'].click(
-        lambda x: x, gradio('grammar_file'), gradio('delete_filename')).then(
-        lambda: 'grammars/', None, gradio('delete_root')).then(
-        lambda: gr.update(visible=True), None, gradio('file_deleter'))
+    #shared.gradio['delete_grammar'].click(
+    #    lambda x: x, gradio('grammar_file'), gradio('delete_filename')).then(
+    #    lambda: 'grammars/', None, gradio('delete_root')).then(
+    #    lambda: gr.update(visible=True), None, gradio('file_deleter'))

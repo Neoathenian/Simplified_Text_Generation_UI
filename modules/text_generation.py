@@ -31,10 +31,7 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False, escap
     )
     length_history=len(curr_messages.data)
 
-    #yield "I´m hungryyyy"
-    #print("question", question)
-    #print("state", state)
-    #yield "Respuesta automática"
+    
     message = globals.client.beta.threads.messages.create(
         thread_id=globals.thread.id,
         role="user",

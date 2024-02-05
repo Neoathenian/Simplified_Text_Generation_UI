@@ -6,33 +6,6 @@ main_parent.style = "padding: 0; margin: 0";
 main_parent.parentNode.style = "gap: 0";
 main_parent.parentNode.parentNode.style = "padding: 0";
 
-document.querySelector(".header_bar").addEventListener("click", function(event) {
-  if (event.target.tagName === "BUTTON") {
-    const buttonText = event.target.textContent.trim();
-
-    let chat_visible = (buttonText == "Chat");
-    let default_visible = (buttonText == "Default");
-    let notebook_visible = (buttonText == "Notebook");
-
-    // Check if one of the generation tabs is visible
-    if (chat_visible || notebook_visible || default_visible) {
-      extensions && (extensions.style.display = "flex");
-
-      if (chat_visible) {
-        this.style.marginBottom = "0px";
-        extensions && (extensions.style.maxWidth = "880px");
-        extensions && (extensions.style.padding = "0px");
-      } else {
-        this.style.marginBottom = "19px";
-        extensions && (extensions.style.maxWidth = "none");
-        extensions && (extensions.style.padding = "15px");
-      }
-    } else {
-      this.style.marginBottom = "19px";
-      extensions && (extensions.style.display = "none");
-    }
-  }
-});
 
 //------------------------------------------------
 // Keyboard shortcuts
@@ -91,12 +64,6 @@ document.addEventListener("keydown", function(event) {
     event.preventDefault();
     document.getElementById("Replace-last").click();
   }
-
-  //// Impersonate on Ctrl + Shift + M
-  //else if (event.ctrlKey && event.shiftKey && event.key === "M") {
-  //  event.preventDefault();
-  //  document.getElementById("Impersonate").click();
-  //}
 
   // Switch between tabs on Tab
   else if (!event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey && event.key === "Tab") {

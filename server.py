@@ -44,7 +44,6 @@ from modules import (
     ui_parameters,
     utils
 )
-from modules.extensions import apply_extensions
 from modules.shared import do_cmd_flags_warnings
 from modules.utils import gradio
 from modules import globals
@@ -71,11 +70,6 @@ def create_interface():
             auth.extend(x.strip() for line in file for x in line.split(',') if x.strip())
     auth = [tuple(cred.split(':')) for cred in auth]
 
-    # Import the extensions and execute their setup() functions
-    if shared.args.extensions is not None and len(shared.args.extensions) > 0:
-        #We´re actually only importing the gallery extension here, but it might be useful for me later
-        extensions_module.load_extensions()
-
     # Force some events to be triggered on page load
     shared.persistent_interface_state.update({
         'mode': shared.settings['mode'],
@@ -88,14 +82,11 @@ def create_interface():
     # css/js strings
     css = ui.css
     js = ui.js
-    css += apply_extensions('css')
-    js += apply_extensions('js')
 
     # Interface state elements
     shared.input_elements = ui.list_interface_input_elements()
 
     with gr.Blocks(css=css, analytics_enabled=False, title=title, theme=ui.theme) as shared.gradio['interface']:
-
         # Interface state
         shared.gradio['interface_state'] = gr.State({k: None for k in shared.input_elements})
 
@@ -109,17 +100,21 @@ def create_interface():
         # Temporary clipboard for saving files
         shared.gradio['temporary_text'] = gr.Textbox(visible=False)
 
+               
+        #ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab      
         # Text Generation tab
         ui_chat.create_ui()
-
-        ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab
-
+        ui_chat.create_chat_settings_ui()
+        
+        #Whatever I need to make it interactive is somehow in the parameters UI!!!!
+        #ui_parameters.create_ui(shared.settings['preset'])  # Parameters tab      
+        #extensions_module.create_extensions_block()  # Extensions block
         # Generation events
         ui_chat.create_event_handlers()
 
         # Other events
         ui_file_saving.create_event_handlers()
-        ui_parameters.create_event_handlers()
+        #ui_parameters.create_event_handlers()
 
         # Interface launch events
         if shared.settings['dark_theme']:
@@ -130,8 +125,7 @@ def create_interface():
         shared.gradio['interface'].load(partial(ui.apply_interface_values, {}, use_persistent=True), None, gradio(ui.list_interface_input_elements()), show_progress=False)
         shared.gradio['interface'].load(chat.redraw_html, gradio(ui_chat.reload_arr), gradio('display'))
 
-        extensions_module.create_extensions_tabs()  # Extensions tabs
-        extensions_module.create_extensions_block()  # Extensions block
+        #extensions_module.create_extensions_block()  # Extensions block
 
     # Launch the interface
     shared.gradio['interface'].queue(concurrency_count=64)
@@ -149,14 +143,6 @@ def create_interface():
         )
 
 if __name__ == "__main__":
-    ##################################
-    #Added by me
-    ##################################
-    #globals.Start_client()
-    #print("client started",globals.client)
-    ##################################
-
-
 
     logger.info("Starting Text generation web UI")
     do_cmd_flags_warnings()

@@ -115,7 +115,7 @@ def chatbot_wrapper(text, state, regenerate=False, _continue=False, loading_mess
 
     visible_text = None
     stopping_strings = get_stopping_strings(state)
-    is_stream = state['stream']
+    is_stream = state.get('stream',False)
 
     # Prepare the input
     if not (regenerate or _continue):

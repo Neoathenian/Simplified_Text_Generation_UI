@@ -142,6 +142,5 @@ def ui():
     update.click(generate_html, [], None).success(
         filter_cards, filter_box, gallery)
 
-    print("-------------------------------------------------------------------")
-    print("gradio",gradio)
+    
     gallery.select(select_character, None, gradio['character_menu'])

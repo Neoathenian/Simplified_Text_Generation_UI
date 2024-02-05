@@ -85,10 +85,10 @@ def get_stopping_strings(state):
     #    renderer = partial(template.render, add_generation_prompt=False)
     #    renderers.append(renderer)
 
-    if True:#state['mode'] in ['chat', 'chat-instruct']:
-        template = jinja_env.from_string(state['chat_template_str'])
-        renderer = partial(template.render, add_generation_prompt=False, name1=state['name1'], name2=state['name2'])
-        renderers.append(renderer)
+    ###if True:#state['mode'] in ['chat', 'chat-instruct']:
+    ###    template = jinja_env.from_string(state['chat_template_str'])
+    ###    renderer = partial(template.render, add_generation_prompt=False, name1=state['name1'], name2=state['name2'])
+    ###    renderers.append(renderer)
 
     for renderer in renderers:
         prefix_bot, suffix_bot = get_generation_prompt(renderer, impersonate=False)

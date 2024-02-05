@@ -97,8 +97,7 @@ def create_ui():
             update.click(generate_html, [], None).success(
                 filter_cards, filter_box, gallery)
             
-            print("------------------------------------------------------------------")
-            print("gradio_dict",shared.gradio)
+            
             
             gallery.select(select_character, None, shared.gradio['character_menu'])
 

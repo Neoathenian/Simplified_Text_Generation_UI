@@ -500,6 +500,27 @@ div.svelte-362y77>*, div.svelte-362y77>.form>* {
     opacity: 0.6;
 }
 
+#say-sources {
+    position: absolute;
+    height: 100%;
+    background-color: var(--background-fill-primary);
+    border: 0 !important;
+    border-radius: 0;
+}
+
+#say-sources label {
+    z-index: 1000;
+    position: absolute;
+    right: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#say-sources span {
+    opacity: 0.6;
+}
+
 #typing-container {
     display: none;
     position: absolute;

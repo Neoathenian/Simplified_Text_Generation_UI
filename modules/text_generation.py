@@ -12,7 +12,8 @@ def generate_reply(*args, **kwargs):
     finally:
         shared.generation_lock.release()
 
-def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False):
+def _generate_reply(question, state, stopping_strings=None, is_chat=False, escape_html=False, for_ui=False,n_retries=2):
+    #print(shared.settings['show_controls'],shared.settings['say_sources'])
     if globals.current_assistant_key is None:
         yield "Vă rugăm să selectați mai întâi un asistent din fila de selecție a caracterelor de mai jos (derulați în jos)"
         #yield "Please select an assistant first from the character selection tab below (scroll down)"
@@ -26,59 +27,27 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False, escap
     if globals.thread is None:
         globals.Start_thread(state["history"]["visible"])
 
-    curr_messages=globals.client.beta.threads.messages.list(
-        thread_id = globals.thread.id
-    )
-    length_history=len(curr_messages.data)
+    response= globals.Ask_question_to_thread(question,globals.thread)
 
-    
-    message = globals.client.beta.threads.messages.create(
-        thread_id=globals.thread.id,
-        role="user",
-        content=question
-        )
-    
-    run = globals.client.beta.threads.runs.create(
-            thread_id=globals.thread.id,
-            assistant_id=globals.current_assistant_key,
-        )
+    #Sometimes it doesn´t find the answer->we´ll ask 2 more times
+    iter_not_found=0
+    while iter_not_found<n_retries and "Nu am reușit să găsesc informațiile în documente" in response:
+        new_thread=globals._get_new_thread(state["history"]["visible"])
+        response= globals.Ask_question_to_thread(question,globals.thread)
+        iter_not_found+=1
 
-    messages=globals.client.beta.threads.messages.list(
-      thread_id = globals.thread.id
-    )
 
-    i=0
-    #If we ever build a chatbot we can just check if it has increased, now we just check if it has answered the question (which is just when len>1)
-    while len(messages.data)==length_history+1 and i<100:
-      sleep(1)
-      messages=globals.client.beta.threads.messages.list(
-        thread_id = globals.thread.id
-      )
-      #print(messages.data)
-      i+=1
-      if i%10==0:
-          print("Waiting for the assistant to answer the question,i=",i)
-
-    response = messages.data[0].content[0].text.value
-    iter=0
-    #We´re doing this loop because it was giving us empty answers, and it seemed that waiting a bit gave us the answer
-    while len(response)==0 and iter<100:
-      sleep(1)
-      messages=globals.client.beta.threads.messages.list(
-        thread_id = globals.thread.id
-      )
-      response = messages.data[0].content[0].text.value
-      
-      iter+=1
-      if iter%10==0:
-          print("Waiting for the assistant to answer the question,iter=",iter)
-    print("")
-    print("messages",messages)
-
-    print("the message should be:", messages.data[0].content[0].text.value)
-
-    yield delete_sursa(messages.data[0].content[0].text.value)
+    response= delete_sursa(response)
     #yield "Soy felix y tengo hambre."
+
+    if shared.settings["say_sources"]:
+        #new_thread=globals._get_new_thread(state["history"]["visible"])
+        response+= "\nCitat: "+delete_sursa(globals.Ask_question_to_thread("Spune-mi citatul exact din care ai luat-o",globals.thread))
+        response+= "\nSursa: "+delete_sursa(globals.Ask_question_to_thread("Spune-mi fișierele din care ai luat-o",globals.thread))
+        #response+= "\nQuote: "+delete_sursa(globals.Ask_question_to_thread("Tell me the exact quote/s you got that from",globals.thread))
+        #response+= "\nSursa: "+delete_sursa(globals.Ask_question_to_thread("Tell me the file/s you got that from",globals.thread))
+    yield response  
+
 
 
 def delete_sursa(text):

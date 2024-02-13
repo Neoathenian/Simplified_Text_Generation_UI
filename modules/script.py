@@ -10,73 +10,7 @@ cards = []
 
 
 def generate_css():
-    css = """
-      .highlighted-border {
-        border-color: rgb(249, 115, 22) !important;
-      }
-
-      .character-gallery > .gallery {
-        margin: 1rem 0;
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        grid-column-gap: 0.4rem;
-        grid-row-gap: 1.2rem;
-      }
-
-      .character-gallery > .label {
-        display: none !important;
-      }
-
-      .character-gallery button.gallery-item {
-        display: contents;
-      }
-
-      .character-container {
-        cursor: pointer;
-        text-align: center;
-        position: relative;
-        opacity: 0.85;
-        display: flex;
-        align-items: center;
-        gap: 0.5 rem;
-      }
-
-      .character-container:hover {
-        opacity: 1;
-      }
-
-      .character-container .placeholder, .character-container img {
-        width: 50px;
-        height: 50px;
-        background-color: gray;
-        object-fit: cover;
-        margin: 0;
-        border-radius: 1rem;
-        border: 3px solid white;
-        box-shadow: 3px 3px 6px 0px rgb(0 0 0 / 50%);
-      }
-
-      .character-name {
-        margin-top: 0;
-        margin-left: 10px;
-        display: block;
-        font-size: 1.2rem;
-        font-weight: 600;
-        overflow-wrap: anywhere;
-        align: center; 
-      }
-
-      @media screen and (width >= 1327px) {
-      #character-gallery-row {
-          position: absolute;
-          top: 16px;
-          right: 0;
-          width: calc(0.5*(var(--document-width) - 880px - 120px - 16px*2));
-          max-width: 300px;
-          margin-right: calc(-0.5*(var(--document-width) - 880px - 14px - 16px * 2));
-      }
-  }
-    """
+    css = ""
     return css
 
 

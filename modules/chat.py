@@ -295,7 +295,6 @@ def get_history_file_path(unique_id, character):#, mode):
     #    p = Path(f'logs/instruct/{unique_id}.json')
     #else:
     p = Path(f'logs/chat/{character}/{unique_id}.json')
-
     return p
 
 

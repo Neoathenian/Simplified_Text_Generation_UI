@@ -80,16 +80,6 @@ def get_stopping_strings(state):
     stopping_strings = []
     renderers = []
 
-    #if state['mode'] in ['instruct', 'chat-instruct']:
-    #    template = jinja_env.from_string(state['instruction_template_str'])
-    #    renderer = partial(template.render, add_generation_prompt=False)
-    #    renderers.append(renderer)
-
-    ###if True:#state['mode'] in ['chat', 'chat-instruct']:
-    ###    template = jinja_env.from_string(state['chat_template_str'])
-    ###    renderer = partial(template.render, add_generation_prompt=False, name1=state['name1'], name2=state['name2'])
-    ###    renderers.append(renderer)
-
     for renderer in renderers:
         prefix_bot, suffix_bot = get_generation_prompt(renderer, impersonate=False)
         prefix_user, suffix_user = get_generation_prompt(renderer, impersonate=True)
@@ -220,15 +210,6 @@ def generate_chat_reply_wrapper(text, state, regenerate=False, _continue=False):
 
     if not character_is_loaded(state):
         return
-
-    #if state['start_with'] != '' and not _continue:
-    #    if regenerate:
-    #        text, state['history'] = remove_last_message(state['history'])
-    #        regenerate = False
-#
-    #    _continue = True
-    #    send_dummy_message(text, state)
-    #    send_dummy_reply(state['start_with'], state)
 
     for i, history in enumerate(generate_chat_reply(text, state, regenerate, _continue, loading_message=True, for_ui=True)):
         yield chat_html_wrapper(history, state['name1'], state['name2'], state['character_menu']), history
@@ -408,15 +389,16 @@ def load_history(unique_id, character):#, mode):
     p = get_history_file_path(unique_id, character)#, mode)
 
     f = json.loads(open(p, 'rb').read())
-    if 'internal' in f and 'visible' in f:
-        history = f
-    else:
-        history = {
-            'internal': f['data'],
-            'visible': f['data_visible']
-        }
+    print(f)
+    #if 'internal' in f and 'visible' in f:
+    #    history = f
+    #else:
+    #    history = {
+    #        'internal': f['data'],
+    #        'visible': f['data_visible']
+    #    }
 
-    return history
+    return f
 
 
 def load_history_json(file, history):

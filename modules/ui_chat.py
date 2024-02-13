@@ -19,14 +19,34 @@ reload_arr = ('history', 'name1', 'name2', 'character_menu')# 'mode',, 'chat_sty
 clear_arr = ('delete_chat-confirm', 'delete_chat', 'delete_chat-cancel')
 
 
+def get_history_file_path(unique_id, character):#, mode):
+    #if mode == 'instruct':
+    #    p = Path(f'logs/instruct/{unique_id}.json')
+    #else:
+    p = Path(f'logs/chat/{character}/{unique_id}.json')
+    return p
+
+def save_history(history, unique_id, character):#, mode):
+    if shared.args.multi_user:
+        print("returning")
+        return
+
+    p = get_history_file_path(unique_id, character)#, mode)
+    print(p)
+    if not p.parent.is_dir():
+        p.parent.mkdir(parents=True)
+
+    with open(p, 'w', encoding='utf-8') as f:
+        print(p,history)
+        f.write(json.dumps(history, indent=4))
+
 def New_chat(history, name1, name2,  character):  
-    shared.gradio["chatbot"].update(visible=False)
-    #return []
+    return []
 
 def print_like_dislike(x: gr.LikeData):
     print(x.index, x.value, x.liked)
 
-def bot(history):
+def bot(history,character_name,unique_id):
     response = "**That's cool!**"
     #print(history)
     history[-1][1] = ""
@@ -34,10 +54,14 @@ def bot(history):
         history[-1][1] += character
         time.sleep(0.05)
         yield history
+    aux_hist=chat.load_history(unique_id, character_name)
+    aux_hist["visible"]=history
+    
+    save_history(aux_hist, unique_id, character_name)#, shared.gradio['mode'])
 
 def add_text(history, text):
     history = history + [(text, None)]
-    #history=[history[-1]]#This would make it so that you only see the last message
+
     return history, gr.Textbox(value="", interactive=False)
 
 
@@ -54,29 +78,6 @@ def create_ui():
     shared.gradio['history'] = gr.State({'internal': [], 'visible': []})
 
     with gr.Tab('Chat', elem_id='chat-tab', elem_classes=("old-ui" if shared.args.chat_buttons else None)):
-        with gr.Column(elem_id='chat-col'):
-            shared.gradio["chatbot"] = gr.Chatbot(
-                [(None,"Hello")],
-                elem_id="chat2",
-                bubble_full_width=False,
-                show_label=False,
-                avatar_images=(None, ("characters/IFire (CARLA).png")),
-            )
-
-            shared.gradio["chatbot"].update(avatar_images=(None,None))
-            txt = gr.Textbox(
-                    scale=4,
-                    show_label=False,
-                    placeholder="Send a message",
-                    container=False,
-                    elem_id="input_textbox",
-                )
-            txt_msg = txt.submit(add_text, [shared.gradio["chatbot"], txt], [shared.gradio["chatbot"], txt], queue=False).then(
-                bot, shared.gradio["chatbot"], shared.gradio["chatbot"], api_name="bot_response"
-            )
-            txt_msg.then(lambda: gr.Textbox(interactive=True), None, [txt], queue=False)
-            
-            shared.gradio["chatbot"].like(print_like_dislike, None, None)
 
         # Hover menu buttons
         with gr.Column(elem_id='chat-buttons'):
@@ -129,6 +130,30 @@ def create_ui():
             update.click(generate_html, [], None).success(
                 filter_cards, filter_box, gallery)
             
+        with gr.Column(elem_id='chat-col'):
+            shared.gradio["chatbot"] = gr.Chatbot(
+                [(None,"Hello")],
+                elem_id="chat2",
+                bubble_full_width=False,
+                show_label=False,
+                avatar_images=(None, ("characters/IFire (CARLA).png")),
+            )
+
+            shared.gradio["chatbot"].update(avatar_images=(None,None))
+            txt = gr.Textbox(
+                    scale=4,
+                    show_label=False,
+                    placeholder="Send a message",
+                    container=False,
+                    elem_id="input_textbox",
+                )
+            txt_msg = txt.submit(add_text, [shared.gradio["chatbot"], txt], [shared.gradio["chatbot"], txt], queue=False).then(
+                bot, [shared.gradio["chatbot"],shared.gradio["character_menu"],shared.gradio["unique_id"]],
+                  shared.gradio["chatbot"], api_name="bot_response"
+            )
+            txt_msg.then(lambda: gr.Textbox(interactive=True), None, [txt], queue=False)
+            
+            shared.gradio["chatbot"].like(print_like_dislike, None, None)
             
             
             gallery.select(select_character, None, shared.gradio['character_menu'])

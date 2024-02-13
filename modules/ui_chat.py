@@ -4,15 +4,18 @@ from pathlib import Path
 
 import gradio as gr
 from PIL import Image
+import os
+import time
+from datetime import datetime
 
 from modules import chat, shared, ui, utils
 from modules.text_generation import stop_everything_event
 from modules.utils import gradio
 from modules.shared import settings
-import os
-import time
-
+from modules import globals
 from modules.script import generate_css,generate_html,filter_cards,custom_js,select_character,cards
+
+
 
 inputs = ('Chat input', 'interface_state')
 reload_arr = ('Logs', 'name1', 'name2', 'character_menu')# 'mode',, 'chat_style', 'name1', 'name2'
@@ -40,8 +43,27 @@ def save_history(history, unique_id, character):#, mode):
         print(p,history)
         f.write(json.dumps(history, indent=4))
 
-def New_chat(history, name1, name2,  character):  
-    return []
+def New_chat(history, name1, name2,  character):
+
+    ##################################
+    #Added by me
+    ##################################
+    if globals.current_assistant_key is not None:
+        globals.Start_thread() 
+    ##################################
+
+
+    #mode = state['mode']
+    history = {'internal': [], 'visible': []}
+
+    history['internal'] += [['<|BEGIN-VISIBLE-CHAT|>', globals.character_info["greeting"]]]
+    history['visible'] += [[None, globals.character_info["greeting"]]]
+
+    unique_id = datetime.now().strftime('%Y%m%d-%H-%M-%S')
+    save_history(history, unique_id, character)
+
+    #return history
+    return history['visible']
 
 def print_like_dislike(x: gr.LikeData):
     print(x.index, x.value, x.liked)

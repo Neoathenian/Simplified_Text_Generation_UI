@@ -23,19 +23,11 @@ clear_arr = ('delete_chat-confirm', 'delete_chat', 'delete_chat-cancel')
 
 
 def get_history_file_path(unique_id, character):#, mode):
-    #if mode == 'instruct':
-    #    p = Path(f'logs/instruct/{unique_id}.json')
-    #else:
-    p = Path(f'logs/chat/{character}/{unique_id}.json')
-    return p
+    return Path(f'logs/chat/{character}/{unique_id}.json')
 
 def save_history(history, unique_id, character):#, mode):
-    if shared.args.multi_user:
-        print("returning")
-        return
-
     p = get_history_file_path(unique_id, character)#, mode)
-    print(p)
+    print("Saving history to:",p)
     if not p.parent.is_dir():
         p.parent.mkdir(parents=True)
 

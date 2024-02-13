@@ -48,7 +48,7 @@ def list_interface_input_elements():
         #'textbox',
         #'start_with',
         'character_menu',
-        'history',
+        'Logs',
         'name1',
         'name2',
         'greeting',

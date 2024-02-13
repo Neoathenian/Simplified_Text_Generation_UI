@@ -58,19 +58,19 @@ def create_event_handlers():
     shared.gradio['delete_cancel'].click(lambda: gr.update(visible=False), None, gradio('file_deleter'))
     shared.gradio['save_cancel'].click(lambda: gr.update(visible=False), None, gradio('file_saver'))
 
-    shared.gradio['save_character_confirm'].click(
-        chat.save_character, gradio('name2', 'greeting', 'context', 'character_picture', 'save_character_filename'), None).then(
-        lambda: gr.update(visible=False), None, gradio('character_saver')).then(
-        lambda x: gr.update(choices=utils.get_available_characters(), value=x), gradio('save_character_filename'), gradio('character_menu'))
+    #shared.gradio['save_character_confirm'].click(
+    #    chat.save_character, gradio('name2', 'greeting', 'context', 'character_picture', 'save_character_filename'), None).then(
+    #    lambda: gr.update(visible=False), None, gradio('character_saver')).then(
+    #    lambda x: gr.update(choices=utils.get_available_characters(), value=x), gradio('save_character_filename'), gradio('character_menu'))
+#
+#    shared.gradio['delete_character_confirm'].click(
+#        lambda x: str(utils.get_available_characters().index(x)), gradio('character_menu'), gradio('temporary_text')).then(
+#        chat.delete_character, gradio('character_menu'), None).then(
+#        chat.update_character_menu_after_deletion, gradio('temporary_text'), gradio('character_menu')).then(
+#        lambda: gr.update(visible=False), None, gradio('character_deleter'))
 
-    shared.gradio['delete_character_confirm'].click(
-        lambda x: str(utils.get_available_characters().index(x)), gradio('character_menu'), gradio('temporary_text')).then(
-        chat.delete_character, gradio('character_menu'), None).then(
-        chat.update_character_menu_after_deletion, gradio('temporary_text'), gradio('character_menu')).then(
-        lambda: gr.update(visible=False), None, gradio('character_deleter'))
-
-    shared.gradio['save_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_saver'))
-    shared.gradio['delete_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_deleter'))
+#    shared.gradio['save_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_saver'))
+#    shared.gradio['delete_character_cancel'].click(lambda: gr.update(visible=False), None, gradio('character_deleter'))
 
     #shared.gradio['save_preset'].click(
     #    ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
@@ -83,7 +83,7 @@ def create_event_handlers():
     #    lambda: gr.update(visible=False), None, gradio('preset_saver')).then(
     #    lambda x: gr.update(choices=utils.get_available_presets(), value=x), gradio('save_preset_filename'), gradio('preset_menu'))
 
-    shared.gradio['save_preset_cancel'].click(lambda: gr.update(visible=False), None, gradio('preset_saver'))
+#    shared.gradio['save_preset_cancel'].click(lambda: gr.update(visible=False), None, gradio('preset_saver'))
 
     #shared.gradio['delete_preset'].click(
     #    lambda x: f'{x}.yaml', gradio('preset_menu'), gradio('delete_filename')).then(

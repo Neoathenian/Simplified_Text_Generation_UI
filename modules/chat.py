@@ -214,37 +214,7 @@ def generate_chat_reply_wrapper(text, state, regenerate=False, _continue=False):
     for i, history in enumerate(generate_chat_reply(text, state, regenerate, _continue, loading_message=True, for_ui=True)):
         yield chat_html_wrapper(history, state['name1'], state['name2'], state['character_menu']), history
 
-def remove_last_message(history):
-    if len(history['visible']) > 0 and history['internal'][-1][0] != '<|BEGIN-VISIBLE-CHAT|>':
-        last = history['visible'].pop()
-        history['internal'].pop()
-    else:
-        last = ['', '']
 
-    return html.unescape(last[0]), history
-
-
-def send_last_reply_to_input(history):
-    if len(history['visible']) > 0:
-        return html.unescape(history['visible'][-1][1])
-    else:
-        return ''
-
-
-def replace_last_reply(text, state):
-    history = state['history']
-
-    if len(text.strip()) == 0:
-        return history
-    elif len(history['visible']) > 0:
-        history['visible'][-1][1] = html.escape(text)
-        history['internal'][-1][1] = apply_extensions('input', text, state, is_chat=True)
-
-    return history
-
-
-def redraw_html(history, name1, name2,  character, reset_cache=False):
-    return chat_html_wrapper(history, name1, name2,  character, reset_cache=reset_cache)
 
 
 def start_new_chat(state):
@@ -503,239 +473,239 @@ def load_character(character, name1, name2):
     return name1, name2, picture, greeting, context
 
 
-def load_instruction_template(template):
-    for filepath in [Path(f'instruction-templates/{template}.yaml'), Path('instruction-templates/Alpaca.yaml')]:
-        if filepath.exists():
-            break
-    else:
-        return ''
-
-    file_contents = open(filepath, 'r', encoding='utf-8').read()
-    data = yaml.safe_load(file_contents)
-    if 'instruction_template' in data:
-        return data['instruction_template']
-    else:
-        return jinja_template_from_old_format(data)
-
-
-@functools.cache
-def load_character_memoized(character, name1, name2):
-    return load_character(character, name1, name2)
+#def load_instruction_template(template):
+#    for filepath in [Path(f'instruction-templates/{template}.yaml'), Path('instruction-templates/Alpaca.yaml')]:
+#        if filepath.exists():
+#            break
+#    else:
+#        return ''
+#
+#    file_contents = open(filepath, 'r', encoding='utf-8').read()
+#    data = yaml.safe_load(file_contents)
+#    if 'instruction_template' in data:
+#        return data['instruction_template']
+#    else:
+#        return jinja_template_from_old_format(data)
 
 
-@functools.cache
-def load_instruction_template_memoized(template):
-    return load_instruction_template(template)
+#@functools.cache
+#def load_character_memoized(character, name1, name2):
+#    return load_character(character, name1, name2)
 
 
-def upload_character(file, img, tavern=False):
-    decoded_file = file if isinstance(file, str) else file.decode('utf-8')
-    try:
-        data = json.loads(decoded_file)
-    except:
-        data = yaml.safe_load(decoded_file)
+#@functools.cache
+#def load_instruction_template_memoized(template):
+#    return load_instruction_template(template)
+#
+#
+#def upload_character(file, img, tavern=False):
+#    decoded_file = file if isinstance(file, str) else file.decode('utf-8')
+#    try:
+#        data = json.loads(decoded_file)
+#    except:
+#        data = yaml.safe_load(decoded_file)
+#
+#    if 'char_name' in data:
+#        name = data['char_name']
+#        greeting = data['char_greeting']
+#        context = build_pygmalion_style_context(data)
+#        yaml_data = generate_character_yaml(name, greeting, context)
+#    else:
+#        name = data['name']
+#        yaml_data = generate_character_yaml(data['name'], data['greeting'], data['context'])
+#
+#    outfile_name = name
+#    i = 1
+#    while Path(f'characters/{outfile_name}.yaml').exists():
+#        outfile_name = f'{name}_{i:03d}'
+#        i += 1
+#
+#    with open(Path(f'characters/{outfile_name}.yaml'), 'w', encoding='utf-8') as f:
+#        f.write(yaml_data)
+#
+#    if img is not None:
+#        img.save(Path(f'characters/{outfile_name}.png'))
+#
+#    logger.info(f'New character saved to "characters/{outfile_name}.yaml".')
+#    return gr.update(value=outfile_name, choices=get_available_characters())
+#
 
-    if 'char_name' in data:
-        name = data['char_name']
-        greeting = data['char_greeting']
-        context = build_pygmalion_style_context(data)
-        yaml_data = generate_character_yaml(name, greeting, context)
-    else:
-        name = data['name']
-        yaml_data = generate_character_yaml(data['name'], data['greeting'], data['context'])
-
-    outfile_name = name
-    i = 1
-    while Path(f'characters/{outfile_name}.yaml').exists():
-        outfile_name = f'{name}_{i:03d}'
-        i += 1
-
-    with open(Path(f'characters/{outfile_name}.yaml'), 'w', encoding='utf-8') as f:
-        f.write(yaml_data)
-
-    if img is not None:
-        img.save(Path(f'characters/{outfile_name}.png'))
-
-    logger.info(f'New character saved to "characters/{outfile_name}.yaml".')
-    return gr.update(value=outfile_name, choices=get_available_characters())
-
-
-def build_pygmalion_style_context(data):
-    context = ""
-    if 'char_persona' in data and data['char_persona'] != '':
-        context += f"{data['char_name']}'s Persona: {data['char_persona']}\n"
-
-    if 'world_scenario' in data and data['world_scenario'] != '':
-        context += f"Scenario: {data['world_scenario']}\n"
-
-    if 'example_dialogue' in data and data['example_dialogue'] != '':
-        context += f"{data['example_dialogue'].strip()}\n"
-
-    context = f"{context.strip()}\n"
-    return context
-
-
-def upload_tavern_character(img, _json):
-    _json = {'char_name': _json['name'], 'char_persona': _json['description'], 'char_greeting': _json['first_mes'], 'example_dialogue': _json['mes_example'], 'world_scenario': _json['scenario']}
-    return upload_character(json.dumps(_json), img, tavern=True)
-
-
-def check_tavern_character(img):
-    if "chara" not in img.info:
-        return "Not a TavernAI card", None, None, gr.update(interactive=False)
-
-    decoded_string = base64.b64decode(img.info['chara']).replace(b'\\r\\n', b'\\n')
-    _json = json.loads(decoded_string)
-    if "data" in _json:
-        _json = _json["data"]
-
-    return _json['name'], _json['description'], _json, gr.update(interactive=True)
+#def build_pygmalion_style_context(data):
+#    context = ""
+#    if 'char_persona' in data and data['char_persona'] != '':
+#        context += f"{data['char_name']}'s Persona: {data['char_persona']}\n"
+#
+#    if 'world_scenario' in data and data['world_scenario'] != '':
+#        context += f"Scenario: {data['world_scenario']}\n"
+#
+#    if 'example_dialogue' in data and data['example_dialogue'] != '':
+#        context += f"{data['example_dialogue'].strip()}\n"
+#
+#    context = f"{context.strip()}\n"
+#    return context
 
 
-def upload_your_profile_picture(img):
-    cache_folder = Path(shared.args.disk_cache_dir)
-    if not cache_folder.exists():
-        cache_folder.mkdir()
-
-    if img is None:
-        if Path(f"{cache_folder}/pfp_me.png").exists():
-            Path(f"{cache_folder}/pfp_me.png").unlink()
-    else:
-        img = make_thumbnail(img)
-        img.save(Path(f'{cache_folder}/pfp_me.png'))
-        logger.info(f'Profile picture saved to "{cache_folder}/pfp_me.png"')
-
-
-def generate_character_yaml(name, greeting, context):
-    data = {
-        'name': name,
-        'greeting': greeting,
-        'context': context,
-    }
-
-    data = {k: v for k, v in data.items() if v}  # Strip falsy
-    return yaml.dump(data, sort_keys=False, width=float("inf"))
+#def upload_tavern_character(img, _json):
+#    _json = {'char_name': _json['name'], 'char_persona': _json['description'], 'char_greeting': _json['first_mes'], 'example_dialogue': _json['mes_example'], 'world_scenario': _json['scenario']}
+#    return upload_character(json.dumps(_json), img, tavern=True)
+#
+#
+#def check_tavern_character(img):
+#    if "chara" not in img.info:
+#        return "Not a TavernAI card", None, None, gr.update(interactive=False)
+#
+#    decoded_string = base64.b64decode(img.info['chara']).replace(b'\\r\\n', b'\\n')
+#    _json = json.loads(decoded_string)
+#    if "data" in _json:
+#        _json = _json["data"]
+#
+#    return _json['name'], _json['description'], _json, gr.update(interactive=True)
 
 
-def generate_instruction_template_yaml(instruction_template):
-    data = {
-        'instruction_template': instruction_template
-    }
-
-    return my_yaml_output(data)
-
-
-def save_character(name, greeting, context, picture, filename):
-    if filename == "":
-        logger.error("The filename is empty, so the character will not be saved.")
-        return
-
-    data = generate_character_yaml(name, greeting, context)
-    filepath = Path(f'characters/{filename}.yaml')
-    save_file(filepath, data)
-    path_to_img = Path(f'characters/{filename}.png')
-    if picture is not None:
-        picture.save(path_to_img)
-        logger.info(f'Saved {path_to_img}.')
-
-
-def delete_character(name, instruct=False):
-    for extension in ["yml", "yaml", "json"]:
-        delete_file(Path(f'characters/{name}.{extension}'))
-
-    delete_file(Path(f'characters/{name}.png'))
+#def upload_your_profile_picture(img):
+#    cache_folder = Path(shared.args.disk_cache_dir)
+#    if not cache_folder.exists():
+#        cache_folder.mkdir()
+#
+#    if img is None:
+#        if Path(f"{cache_folder}/pfp_me.png").exists():
+#            Path(f"{cache_folder}/pfp_me.png").unlink()
+#    else:
+#        img = make_thumbnail(img)
+#        img.save(Path(f'{cache_folder}/pfp_me.png'))
+#        logger.info(f'Profile picture saved to "{cache_folder}/pfp_me.png"')
+#
+#
+#def generate_character_yaml(name, greeting, context):
+#    data = {
+#        'name': name,
+#        'greeting': greeting,
+#        'context': context,
+#    }
+#
+#    data = {k: v for k, v in data.items() if v}  # Strip falsy
+#    return yaml.dump(data, sort_keys=False, width=float("inf"))
 
 
-def jinja_template_from_old_format(params, verbose=False):
-    MASTER_TEMPLATE = """
-{%- set ns = namespace(found=false) -%}
-{%- for message in messages -%}
-    {%- if message['role'] == 'system' -%}
-        {%- set ns.found = true -%}
-    {%- endif -%}
-{%- endfor -%}
-{%- if not ns.found -%}
-    {{- '<|PRE-SYSTEM|>' + '<|SYSTEM-MESSAGE|>' + '<|POST-SYSTEM|>' -}}
-{%- endif %}
-{%- for message in messages %}
-    {%- if message['role'] == 'system' -%}
-        {{- '<|PRE-SYSTEM|>' + message['content'] + '<|POST-SYSTEM|>' -}}
-    {%- else -%}
-        {%- if message['role'] == 'user' -%}
-            {{-'<|PRE-USER|>' + message['content'] + '<|POST-USER|>'-}}
-        {%- else -%}
-            {{-'<|PRE-ASSISTANT|>' + message['content'] + '<|POST-ASSISTANT|>' -}}
-        {%- endif -%}
-    {%- endif -%}
-{%- endfor -%}
-{%- if add_generation_prompt -%}
-    {{-'<|PRE-ASSISTANT-GENERATE|>'-}}
-{%- endif -%}
-"""
-
-    if 'context' in params and '<|system-message|>' in params['context']:
-        pre_system = params['context'].split('<|system-message|>')[0]
-        post_system = params['context'].split('<|system-message|>')[1]
-    else:
-        pre_system = ''
-        post_system = ''
-
-    pre_user = params['turn_template'].split('<|user-message|>')[0].replace('<|user|>', params['user'])
-    post_user = params['turn_template'].split('<|user-message|>')[1].split('<|bot|>')[0]
-
-    pre_assistant = '<|bot|>' + params['turn_template'].split('<|bot-message|>')[0].split('<|bot|>')[1]
-    pre_assistant = pre_assistant.replace('<|bot|>', params['bot'])
-    post_assistant = params['turn_template'].split('<|bot-message|>')[1]
-
-    def preprocess(string):
-        return string.replace('\n', '\\n').replace('\'', '\\\'')
-
-    pre_system = preprocess(pre_system)
-    post_system = preprocess(post_system)
-    pre_user = preprocess(pre_user)
-    post_user = preprocess(post_user)
-    pre_assistant = preprocess(pre_assistant)
-    post_assistant = preprocess(post_assistant)
-
-    if verbose:
-        print(
-            '\n',
-            repr(pre_system) + '\n',
-            repr(post_system) + '\n',
-            repr(pre_user) + '\n',
-            repr(post_user) + '\n',
-            repr(pre_assistant) + '\n',
-            repr(post_assistant) + '\n',
-        )
-
-    result = MASTER_TEMPLATE
-    if 'system_message' in params:
-        result = result.replace('<|SYSTEM-MESSAGE|>', preprocess(params['system_message']))
-    else:
-        result = result.replace('<|SYSTEM-MESSAGE|>', '')
-
-    result = result.replace('<|PRE-SYSTEM|>', pre_system)
-    result = result.replace('<|POST-SYSTEM|>', post_system)
-    result = result.replace('<|PRE-USER|>', pre_user)
-    result = result.replace('<|POST-USER|>', post_user)
-    result = result.replace('<|PRE-ASSISTANT|>', pre_assistant)
-    result = result.replace('<|PRE-ASSISTANT-GENERATE|>', pre_assistant.rstrip(' '))
-    result = result.replace('<|POST-ASSISTANT|>', post_assistant)
-
-    result = result.strip()
-
-    return result
+#def generate_instruction_template_yaml(instruction_template):
+#    data = {
+#        'instruction_template': instruction_template
+#    }
+#
+#    return my_yaml_output(data)
 
 
-def my_yaml_output(data):
-    '''
-    pyyaml is very inconsistent with multiline strings.
-    for simple instruction template outputs, this is enough.
-    '''
-    result = ""
-    for k in data:
-        result += k + ": |-\n"
-        for line in data[k].splitlines():
-            result += "  " + line.rstrip(' ') + "\n"
+#def save_character(name, greeting, context, picture, filename):
+#    if filename == "":
+#        logger.error("The filename is empty, so the character will not be saved.")
+#        return
+#
+#    data = generate_character_yaml(name, greeting, context)
+#    filepath = Path(f'characters/{filename}.yaml')
+#    save_file(filepath, data)
+#    path_to_img = Path(f'characters/{filename}.png')
+#    if picture is not None:
+#        picture.save(path_to_img)
+#        logger.info(f'Saved {path_to_img}.')
+#
+#
+#def delete_character(name, instruct=False):
+#    for extension in ["yml", "yaml", "json"]:
+#        delete_file(Path(f'characters/{name}.{extension}'))
+#
+#    delete_file(Path(f'characters/{name}.png'))
 
-    return result
+
+#def jinja_template_from_old_format(params, verbose=False):
+#    MASTER_TEMPLATE = """
+#{%- set ns = namespace(found=false) -%}
+#{%- for message in messages -%}
+#    {%- if message['role'] == 'system' -%}
+#        {%- set ns.found = true -%}
+#    {%- endif -%}
+#{%- endfor -%}
+#{%- if not ns.found -%}
+#    {{- '<|PRE-SYSTEM|>' + '<|SYSTEM-MESSAGE|>' + '<|POST-SYSTEM|>' -}}
+#{%- endif %}
+#{%- for message in messages %}
+#    {%- if message['role'] == 'system' -%}
+#        {{- '<|PRE-SYSTEM|>' + message['content'] + '<|POST-SYSTEM|>' -}}
+#    {%- else -%}
+#        {%- if message['role'] == 'user' -%}
+#            {{-'<|PRE-USER|>' + message['content'] + '<|POST-USER|>'-}}
+#        {%- else -%}
+#            {{-'<|PRE-ASSISTANT|>' + message['content'] + '<|POST-ASSISTANT|>' -}}
+#        {%- endif -%}
+#    {%- endif -%}
+#{%- endfor -%}
+#{%- if add_generation_prompt -%}
+#    {{-'<|PRE-ASSISTANT-GENERATE|>'-}}
+#{%- endif -%}
+#"""
+#
+#    if 'context' in params and '<|system-message|>' in params['context']:
+#        pre_system = params['context'].split('<|system-message|>')[0]
+#        post_system = params['context'].split('<|system-message|>')[1]
+#    else:
+#        pre_system = ''
+#        post_system = ''
+#
+#    pre_user = params['turn_template'].split('<|user-message|>')[0].replace('<|user|>', params['user'])
+#    post_user = params['turn_template'].split('<|user-message|>')[1].split('<|bot|>')[0]
+#
+#    pre_assistant = '<|bot|>' + params['turn_template'].split('<|bot-message|>')[0].split('<|bot|>')[1]
+#    pre_assistant = pre_assistant.replace('<|bot|>', params['bot'])
+#    post_assistant = params['turn_template'].split('<|bot-message|>')[1]
+#
+#    def preprocess(string):
+#        return string.replace('\n', '\\n').replace('\'', '\\\'')
+#
+#    pre_system = preprocess(pre_system)
+#    post_system = preprocess(post_system)
+#    pre_user = preprocess(pre_user)
+#    post_user = preprocess(post_user)
+#    pre_assistant = preprocess(pre_assistant)
+#    post_assistant = preprocess(post_assistant)
+#
+#    if verbose:
+#        print(
+#            '\n',
+#            repr(pre_system) + '\n',
+#            repr(post_system) + '\n',
+#            repr(pre_user) + '\n',
+#            repr(post_user) + '\n',
+#            repr(pre_assistant) + '\n',
+#            repr(post_assistant) + '\n',
+#        )
+#
+#    result = MASTER_TEMPLATE
+#    if 'system_message' in params:
+#        result = result.replace('<|SYSTEM-MESSAGE|>', preprocess(params['system_message']))
+#    else:
+#        result = result.replace('<|SYSTEM-MESSAGE|>', '')
+#
+#    result = result.replace('<|PRE-SYSTEM|>', pre_system)
+#    result = result.replace('<|POST-SYSTEM|>', post_system)
+#    result = result.replace('<|PRE-USER|>', pre_user)
+#    result = result.replace('<|POST-USER|>', post_user)
+#    result = result.replace('<|PRE-ASSISTANT|>', pre_assistant)
+#    result = result.replace('<|PRE-ASSISTANT-GENERATE|>', pre_assistant.rstrip(' '))
+#    result = result.replace('<|POST-ASSISTANT|>', post_assistant)
+#
+#    result = result.strip()
+#
+#    return result
+#
+#
+##def my_yaml_output(data):
+##    '''
+##    pyyaml is very inconsistent with multiline strings.
+##    for simple instruction template outputs, this is enough.
+##    '''
+##    result = ""
+##    for k in data:
+#        result += k + ": |-\n"
+#        for line in data[k].splitlines():
+#            result += "  " + line.rstrip(' ') + "\n"
+#
+#    return result

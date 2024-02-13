@@ -15,7 +15,7 @@ import time
 from modules.script import generate_css,generate_html,filter_cards,custom_js,select_character,cards
 
 inputs = ('Chat input', 'interface_state')
-reload_arr = ('history', 'name1', 'name2', 'character_menu')# 'mode',, 'chat_style', 'name1', 'name2'
+reload_arr = ('Logs', 'name1', 'name2', 'character_menu')# 'mode',, 'chat_style', 'name1', 'name2'
 clear_arr = ('delete_chat-confirm', 'delete_chat', 'delete_chat-cancel')
 
 
@@ -56,7 +56,7 @@ def bot(history,character_name,unique_id):
         yield history
     aux_hist=chat.load_history(unique_id, character_name)
     aux_hist["visible"]=history
-    
+
     save_history(aux_hist, unique_id, character_name)#, shared.gradio['mode'])
 
 def add_text(history, text):
@@ -65,17 +65,12 @@ def add_text(history, text):
     return history, gr.Textbox(value="", interactive=False)
 
 
-#def add_file(history, file):
-#    history = history + [((file.name,), None)]
-#    return history
-
-
 
 def create_ui():
     mu = shared.args.multi_user
 
     shared.gradio['Chat input'] = gr.State()
-    shared.gradio['history'] = gr.State({'internal': [], 'visible': []})
+    shared.gradio['Logs'] = gr.State({'internal': [], 'visible': [], "likes":[]})
 
     with gr.Tab('Chat', elem_id='chat-tab', elem_classes=("old-ui" if shared.args.chat_buttons else None)):
 
@@ -187,13 +182,13 @@ def create_event_handlers():
 
     if not shared.args.multi_user:
         shared.gradio['unique_id'].select(
-            chat.load_history, gradio('unique_id', 'character_menu'), gradio('history')).then(
-            chat.redraw_html, gradio(reload_arr), None)
+            chat.load_history, gradio('unique_id', 'character_menu'), gradio('Logs'))#.then(
+            #chat.redraw_html, gradio(reload_arr), None)
 
     shared.gradio['Start new chat'].click(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.start_new_chat, gradio('interface_state'), gradio('history')).then(
-        chat.redraw_html, gradio(reload_arr), None).then(
+        chat.start_new_chat, gradio('interface_state'), gradio('Logs')).then(
+        #chat.redraw_html, gradio(reload_arr), None).then(
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), 
             gradio('interface_state'), gradio('unique_id')).then(New_chat,gradio(reload_arr),shared.gradio["chatbot"])
 
@@ -203,8 +198,8 @@ def create_event_handlers():
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
         lambda x, y: str(chat.find_all_histories(x).index(y)), gradio('interface_state', 'unique_id'), gradio('temporary_text')).then(
         chat.delete_history, gradio('unique_id', 'character_menu'), None).then(
-        chat.load_history_after_deletion, gradio('interface_state', 'temporary_text'), gradio('history', 'unique_id')).then(
-        chat.redraw_html, gradio(reload_arr), None).then(
+        chat.load_history_after_deletion, gradio('interface_state', 'temporary_text'), gradio('Logs', 'unique_id')).then(
+        #chat.redraw_html, gradio(reload_arr), None).then(
         lambda: [gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)], None, gradio(clear_arr))
 
     shared.gradio['rename_chat'].click(
@@ -226,23 +221,23 @@ def create_event_handlers():
 #
     shared.gradio['load_chat_history'].upload(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.start_new_chat, gradio('interface_state'), gradio('history')).then(
-        chat.load_history_json, gradio('load_chat_history', 'history'), gradio('history')).then(
-        chat.redraw_html, gradio(reload_arr), None).then(
+        chat.start_new_chat, gradio('interface_state'), gradio('Logs')).then(
+        chat.load_history_json, gradio('load_chat_history', 'Logs'), gradio('Logs')).then(
+        #chat.redraw_html, gradio(reload_arr), None).then(
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), gradio('interface_state'), gradio('unique_id')).then(
-        chat.save_history, gradio('history', 'unique_id', 'character_menu'), None).then(
+        chat.save_history, gradio('Logs', 'unique_id', 'character_menu'), None).then(
         lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_chat()}}')
 
     shared.gradio['character_menu'].change(
         chat.load_character, gradio('character_menu', 'name1', 'name2'), gradio('name1', 'name2', 'character_picture', 'greeting', 'context')).success(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.load_latest_history, gradio('interface_state'), gradio('history')).then(
-        chat.redraw_html, gradio(reload_arr), None).then(
+        chat.load_latest_history, gradio('interface_state'), gradio('Logs')).then(
+        #chat.redraw_html, gradio(reload_arr), None).then(
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), gradio('interface_state'), gradio('unique_id')).then(
         lambda: None, None, None, _js=f'() => {{{ui.update_big_picture_js}; updateBigPicture()}}')
 
-    shared.gradio['your_picture'].change(
-        chat.upload_your_profile_picture, gradio('your_picture'), None).then(
-        partial(chat.redraw_html, reset_cache=True), gradio(reload_arr), None)
+    #shared.gradio['your_picture'].change(
+    #    chat.upload_your_profile_picture, gradio('your_picture'), None)#.then(
+        #partial(chat.redraw_html, reset_cache=True), gradio(reload_arr), None)
 
     

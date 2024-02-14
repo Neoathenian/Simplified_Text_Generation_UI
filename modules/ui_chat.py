@@ -13,12 +13,8 @@ from modules.html_generator import chat_html_wrapper
 from modules.text_generation import stop_everything_event
 from modules.utils import gradio
 from modules.shared import settings
-<<<<<<< HEAD
-from modules import globals
-=======
 
 
->>>>>>> parent of a72b125 (kj)
 from modules.script import generate_css,generate_html,filter_cards,custom_js,select_character,cards
 
 
@@ -28,37 +24,6 @@ reload_arr = ('Logs', 'name1', 'name2', 'character_menu')# 'mode',, 'chat_style'
 clear_arr = ('delete_chat-confirm', 'delete_chat', 'delete_chat-cancel')
 
 
-<<<<<<< HEAD
-def print_like_dislike(x: gr.LikeData,unique_id,character_name):
-    aux_hist=chat.load_history(unique_id, character_name)
-    aux_hist["likes"]+=[(x.index[0],x.value,x.liked)]
-    chat.save_history(aux_hist, unique_id, character_name)
-
-    print(x.index, x.value, x.liked)
-
-def bot(history,character_name,unique_id):
-    response = "**That's cool!**"
-    #print(history)
-    history[-1][1] = ""
-    for character in response:
-        history[-1][1] += character
-        time.sleep(0.05)
-        yield history
-    aux_hist=chat.load_history(unique_id, character_name)
-    aux_hist["visible"]=history
-
-    chat.save_history(aux_hist, unique_id, character_name)
-
-def add_text(history, text):
-    """This basically resets the textbox and updates the internal history of the chatbot"""
-    history = history + [(text, None)]
-
-    return history, gr.Textbox(value="", interactive=False)
-
-
-
-=======
->>>>>>> parent of a72b125 (kj)
 def create_ui():
     mu = shared.args.multi_user
 
@@ -66,8 +31,6 @@ def create_ui():
     shared.gradio['Logs'] = gr.State({'internal': [], 'visible': [], "likes":[]})
 
     with gr.Tab('Chat', elem_id='chat-tab', elem_classes=("old-ui" if shared.args.chat_buttons else None)):
-<<<<<<< HEAD
-=======
         with gr.Row():
             with gr.Column(elem_id='chat-col'):
                 shared.gradio['display'] = gr.HTML(value=chat_html_wrapper({'internal': [], 'visible': []}, '', '', 'chat', ''))
@@ -85,7 +48,6 @@ def create_ui():
                         with gr.Row():
                             shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop', visible=False)
                             shared.gradio['Generate'] = gr.Button('Generate', elem_id='Generate', variant='primary')
->>>>>>> parent of a72b125 (kj)
 
         # Hover menu buttons
         with gr.Column(elem_id='chat-buttons'):
@@ -248,20 +210,6 @@ def create_event_handlers():
     shared.input_params = gradio(inputs)
     shared.reload_inputs = gradio(reload_arr)
 
-<<<<<<< HEAD
-    ###if not shared.args.multi_user:
-    ###    shared.gradio['unique_id'].select(
-    ###        chat.load_history, gradio('unique_id', 'character_menu'), gradio('Logs'))#.then(
-    ###        #chat.redraw_html, gradio(reload_arr), None)
-
-    shared.gradio['Start new chat'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.New_chat,gradio("interface_state"),shared.gradio["chatbot"]).then(
-        #chat.New_chat, gradio('interface_state'), gradio('Logs')).then(
-        #chat.redraw_html, gradio(reload_arr), None).then(
-        lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), 
-            gradio('interface_state'), gradio('unique_id'))#.then(chat.New_chat,gradio("interface_state"),shared.gradio["chatbot"])
-=======
     shared.gradio['Generate'].click(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
         lambda x: (x, ''), gradio('textbox'), gradio('Chat input', 'textbox'), show_progress=False).then(
@@ -319,7 +267,6 @@ def create_event_handlers():
         chat.start_new_chat, gradio('interface_state'), gradio('history')).then(
         chat.redraw_html, gradio(reload_arr), gradio('display')).then(
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), gradio('interface_state'), gradio('unique_id'))
->>>>>>> parent of a72b125 (kj)
 
     shared.gradio['delete_chat'].click(lambda: [gr.update(visible=True), gr.update(visible=False), gr.update(visible=True)], None, gradio(clear_arr))
     shared.gradio['delete_chat-cancel'].click(lambda: [gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)], None, gradio(clear_arr))
@@ -333,7 +280,6 @@ def create_event_handlers():
 =======
         chat.load_history_after_deletion, gradio('interface_state', 'temporary_text'), gradio('history', 'unique_id')).then(
         chat.redraw_html, gradio(reload_arr), gradio('display')).then(
->>>>>>> parent of a72b125 (kj)
         lambda: [gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)], None, gradio(clear_arr))
 
     shared.gradio['rename_chat'].click(
@@ -363,7 +309,6 @@ def create_event_handlers():
         chat.start_new_chat, gradio('interface_state'), gradio('history')).then(
         chat.load_history_json, gradio('load_chat_history', 'history'), gradio('history')).then(
         chat.redraw_html, gradio(reload_arr), gradio('display')).then(
->>>>>>> parent of a72b125 (kj)
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), gradio('interface_state'), gradio('unique_id')).then(
         chat.save_history, gradio('Logs', 'unique_id', 'character_menu'), None).then(
         lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_chat()}}')
@@ -377,7 +322,6 @@ def create_event_handlers():
 =======
         chat.load_latest_history, gradio('interface_state'), gradio('history')).then(
         chat.redraw_html, gradio(reload_arr), gradio('display')).then(
->>>>>>> parent of a72b125 (kj)
         lambda x: gr.update(choices=(histories := chat.find_all_histories(x)), value=histories[0]), gradio('interface_state'), gradio('unique_id')).then(
         lambda: None, None, None, _js=f'() => {{{ui.update_big_picture_js}; updateBigPicture()}}')
 
@@ -430,4 +374,3 @@ def create_event_handlers():
     #    lambda: None, None, None, _js=f'() => {{{ui.switch_tabs_js}; switch_to_generation_parameters()}}')
 
     shared.gradio['show_controls'].change(None, gradio('show_controls'), None, _js=f'(x) => {{{ui.show_controls_js}; toggle_controls(x)}}')
->>>>>>> parent of a72b125 (kj)

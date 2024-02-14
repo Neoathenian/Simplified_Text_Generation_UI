@@ -51,8 +51,18 @@ def New_chat(state):
     return history['visible']
 
 
+<<<<<<< HEAD
 def get_history_file_path(unique_id, character):
     return Path(f'logs/chat/{character}/{unique_id}.json')
+=======
+def get_history_file_path(unique_id, character):#, mode):
+    #if mode == 'instruct':
+    #    p = Path(f'logs/instruct/{unique_id}.json')
+    #else:
+    p = Path(f'logs/chat/{character}/{unique_id}.json')
+
+    return p
+>>>>>>> parent of a72b125 (kj)
 
 def save_history(history, unique_id, character):
     p = get_history_file_path(unique_id, character)

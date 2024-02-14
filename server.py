@@ -121,9 +121,13 @@ def create_interface():
             shared.gradio['interface'].load(lambda: None, None, None, _js="() => document.getElementsByTagName('body')[0].classList.add('dark')")
 
         shared.gradio['interface'].load(lambda: None, None, None, _js=f"() => {{{js}}}")
-        #shared.gradio['interface'].load(None, gradio('show_controls'), None, _js=f'(x) => {{{ui.show_controls_js}; toggle_controls(x)}}')
+        shared.gradio['interface'].load(None, gradio('show_controls'), None, _js=f'(x) => {{{ui.show_controls_js}; toggle_controls(x)}}')
         shared.gradio['interface'].load(partial(ui.apply_interface_values, {}, use_persistent=True), None, gradio(ui.list_interface_input_elements()), show_progress=False)
+<<<<<<< HEAD
         #shared.gradio['interface'].load(chat.redraw_html, gradio(ui_chat.reload_arr), None)
+=======
+        shared.gradio['interface'].load(chat.redraw_html, gradio(ui_chat.reload_arr), gradio('display'))
+>>>>>>> parent of a72b125 (kj)
 
         #extensions_module.create_extensions_block()  # Extensions block
 

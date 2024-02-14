@@ -27,8 +27,9 @@ jinja_env = ImmutableSandboxedEnvironment(trim_blocks=True, lstrip_blocks=True)
 
 
 
-
-def start_new_chat(state):
+def New_chat(state):
+    history, name1, name2,  character= state['Logs'], state['name1'], state['name2'], state['character_menu']
+    history = globals.internal_logs
     ##################################
     #Added by me
     ##################################
@@ -38,25 +39,23 @@ def start_new_chat(state):
 
 
     #mode = state['mode']
+    #if history is None:
     history = {'internal': [], 'visible': []}
-
-    if True:#mode != 'instruct':
-        greeting = replace_character_names(state['greeting'], state['name1'], state['name2'])
-        if greeting != '':
-            history['internal'] += [['<|BEGIN-VISIBLE-CHAT|>', greeting]]
-            history['visible'] += [['', apply_extensions('output', greeting, state, is_chat=True)]]
-
+    history['internal'] += [['<|BEGIN-VISIBLE-CHAT|>', globals.character_info["greeting"]]]
+    history['visible'] += [[None, globals.character_info["greeting"]]]
+    
     unique_id = datetime.now().strftime('%Y%m%d-%H-%M-%S')
-    save_history(history, unique_id, state['character_menu'])#, state['mode'])
+    save_history(history, unique_id, character)
 
-    return history
+    #return history
+    return history['visible']
 
 
-def get_history_file_path(unique_id, character):#, mode):
+def get_history_file_path(unique_id, character):
     return Path(f'logs/chat/{character}/{unique_id}.json')
 
-def save_history(history, unique_id, character):#, mode):
-    p = get_history_file_path(unique_id, character)#, mode)
+def save_history(history, unique_id, character):
+    p = get_history_file_path(unique_id, character)
     print("Saving history to:",p)
     if not p.parent.is_dir():
         p.parent.mkdir(parents=True)
@@ -66,12 +65,12 @@ def save_history(history, unique_id, character):#, mode):
         f.write(json.dumps(history, indent=4))
 
 
-def rename_history(old_id, new_id, character):#, mode):
+def rename_history(old_id, new_id, character):
     if shared.args.multi_user:
         return
 
-    old_p = get_history_file_path(old_id, character)#), mode)
-    new_p = get_history_file_path(new_id, character)#), mode)
+    old_p = get_history_file_path(old_id, character)
+    new_p = get_history_file_path(new_id, character)
     if new_p.parent != old_p.parent:
         logger.error(f"The following path is not allowed: {new_p}.")
     elif new_p == old_p:
@@ -119,16 +118,17 @@ def load_latest_history(state):
     '''
 
     if shared.args.multi_user:
-        return start_new_chat(state)
+        return New_chat(state)
 
     histories = find_all_histories(state)
 
     if len(histories) > 0:
         history = load_history(histories[0], state['character_menu'])#, state['mode'])
     else:
-        history = start_new_chat(state)
+        history = New_chat(state)
 
-    return history
+    globals.internal_logs=history
+    #return history
 
 
 def load_history_after_deletion(state, idx):
@@ -138,7 +138,7 @@ def load_history_after_deletion(state, idx):
     '''
 
     if shared.args.multi_user:
-        return start_new_chat(state)
+        return New_chat(state)
 
     histories = find_all_histories(state)
     idx = min(int(idx), len(histories) - 1)
@@ -147,21 +147,23 @@ def load_history_after_deletion(state, idx):
     if len(histories) > 0:
         history = load_history(histories[idx], state['character_menu'])#, state['mode'])
     else:
-        history = start_new_chat(state)
+        history = New_chat(state)
         histories = find_all_histories(state)
 
-    return history, gr.update(choices=histories, value=histories[idx])
+    #return history, 
+    return gr.update(choices=histories, value=histories[idx])
 
 
-def load_history(unique_id, character):#, mode):
-    p = get_history_file_path(unique_id, character)#, mode)
+def load_history(unique_id, character):
+    p = get_history_file_path(unique_id, character)
 
     f = json.loads(open(p, 'rb').read())
     print("f_dict",f)
     return f
 
 
-def load_history_json(file, history):
+def load_history_json(file):
+    print("From json loaded",file)
     try:
         file = file.decode('utf-8')
         f = json.loads(file)
@@ -173,13 +175,18 @@ def load_history_json(file, history):
                 'visible': f['data_visible']
             }
 
-        return history
+        #return history
     except:
-        return history
+        #return history
+        pass
+    print("")
+    print("From json loaded",history)
+    globals.internal_logs=history
+    return history["internal"]
 
 
-def delete_history(unique_id, character):#, mode):
-    p = get_history_file_path(unique_id, character)#, mode)
+def delete_history(unique_id, character):
+    p = get_history_file_path(unique_id, character)
     delete_file(p)
 
 

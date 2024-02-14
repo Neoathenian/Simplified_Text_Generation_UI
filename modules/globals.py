@@ -7,6 +7,7 @@ thread=None
 
 current_assistant_key=None
 character_info={"name1":"Missing","name2":"Missing","greeting":"Missing"}
+internal_logs={}
 
 def Start_client():
     global client
